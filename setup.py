@@ -1,10 +1,4 @@
 #!/usr/bin/env python
-import os
-import os.path as osp
-import platform
-import shutil
-import sys
-import warnings
 from setuptools import find_packages, setup
 
 
@@ -98,8 +92,6 @@ def parse_requirements(fname='requirements.txt', with_version=True):
 
     packages = list(gen_packages_items())
     return packages
-
-
 
 
 if __name__ == '__main__':

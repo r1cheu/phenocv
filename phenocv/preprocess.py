@@ -3,8 +3,7 @@ import numpy as np
 
 
 def binarize_cive(img):
-    """
-    Binarize an image using the CIVE (Color Index of Vegetation Extraction)
+    """Binarize an image using the CIVE (Color Index of Vegetation Extraction)
     algorithm.
 
     Parameters:
@@ -16,14 +15,12 @@ def binarize_cive(img):
     B, G, R = cv2.split(img)
     cive = 0.441 * R - 0.811 * G + 0.385 * B + 18.78745
     gray = cive.astype('uint8')
-    _, th = cv2.threshold(gray, 0, 1,
-                          cv2.THRESH_BINARY + cv2.THRESH_OTSU)
+    _, th = cv2.threshold(gray, 0, 1, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
     return th
 
 
 def moving_average(interval, window_size):
-    """
-    Calculate the moving average of a given interval.
+    """Calculate the moving average of a given interval.
 
     Parameters:
     interval (array-like): The input interval.
@@ -38,8 +35,7 @@ def moving_average(interval, window_size):
 
 
 def min_sum(x, length, window_size):
-    """
-    Calculate the index range with the minimum sum of a given array.
+    """Calculate the index range with the minimum sum of a given array.
 
     Parameters:
     x (array-like): The input array.
@@ -56,9 +52,8 @@ def min_sum(x, length, window_size):
 
 
 def cut_plot(img_path, width, height, window_size):
-    """
-    Cuts a plot from an image based on the specified width, height,
-    and window size.
+    """Cuts a plot from an image based on the specified width, height, and
+    window size.
 
     Args:
         img_path (str): The path to the image file.
@@ -71,7 +66,7 @@ def cut_plot(img_path, width, height, window_size):
     Returns:
         numpy.ndarray: The cropped plot image.
     """
-    
+
     img = cv2.imread(str(img_path))
     binary = binarize_cive(img)
 

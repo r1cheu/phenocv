@@ -1,10 +1,10 @@
-# MMPheno
+# phenocv
 
 ## Introduction
 
-**phenocv** is a toolkits for handling preporecess and postprocess for rice high-throught phenotyping images. 
+**phenocv** is a toolkits for handling preporecess and postprocess for rice high-throught phenotyping images.
 
-**phenocv** is currently in its early development phase and should be considered as a work in progress, and it's now private use code library. 
+**phenocv** is currently in its early development phase and should be considered as a work in progress, and it's now private use code library.
 
 ## License
 

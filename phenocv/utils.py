@@ -2,6 +2,10 @@ import os
 import os.path as osp
 from pathlib import Path
 
+import torch
+from torchvision.io import write_png
+from torchvision.utils import draw_bounding_boxes
+
 
 def scandir(dir_path, suffix=None, recursive=False, case_sensitive=True):
     """Scan a directory to find the interested files.
@@ -45,3 +49,38 @@ def scandir(dir_path, suffix=None, recursive=False, case_sensitive=True):
                                     case_sensitive)
 
     return _scandir(dir_path, suffix, recursive, case_sensitive)
+
+
+def prepare_io_dir(input_dir, output_dir):
+    """Prepare input and output directories.
+
+    Args:
+        input_dir (str | :obj:`Path`): Path of the input directory.
+        output_dir (str | :obj:`Path`): Path of the output directory.
+
+    Returns:
+        A tuple containing the input and output directories.
+    """
+    if not isinstance(input_dir, (str, Path)):
+        raise TypeError('"input_dir" must be a string or Path object')
+    input_dir = Path(input_dir).resolve()
+
+    if output_dir is None:
+        output_dir = input_dir.with_name(f'{input_dir.name}_out')
+    if not isinstance(output_dir, (str, Path)):
+        raise TypeError('"output_dir" must be a string or Path object')
+    output_dir = Path(output_dir).resolve()
+
+    try:
+        output_dir.mkdir()
+    except FileExistsError:
+        print(f'{output_dir} already exists, remove it first.')
+        exit(1)
+    return input_dir, output_dir
+
+
+def save_pred(image, bboxes, file_name: str):
+    image = image.transpose(2, 0, 1)
+    image = draw_bounding_boxes(
+        torch.from_numpy(image), bboxes, colors='red', fill=True, width=3)
+    write_png(image, file_name)

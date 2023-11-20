@@ -116,6 +116,8 @@ data
 work_dirs/
 raw_data/
 yolo/
+tests/
+label_studio/
 # Pytorch
 *.pth
 *.py~
