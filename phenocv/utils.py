@@ -74,8 +74,8 @@ def prepare_io_dir(input_dir, output_dir):
     try:
         output_dir.mkdir()
     except FileExistsError:
-        print(f'{output_dir} already exists, remove it first.')
-        exit(1)
+        raise FileExistsError(f'{output_dir} already exists, remove it first.')
+
     return input_dir, output_dir
 
 
