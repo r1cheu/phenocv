@@ -123,3 +123,5 @@ label_studio/
 *.py~
 *.sh~
 *.pt
+phenocv.code-workspace
+.fleet/settings.json

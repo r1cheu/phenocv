@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 from argparse import ArgumentParser
 
 import cv2
@@ -16,6 +17,10 @@ def get_args():
         default=None,
         help='Path to output '
         'directory.')
+    parser.add_argument(
+        '--save',
+        action='store_true',
+        help='whether to save the extracted plots')
     parser.add_argument(
         '--suffix',
         type=str,
@@ -41,10 +46,14 @@ def main():
     pbar = tqdm(img_paths)
     for img_path in pbar:
         pbar.set_description(f'Processing {img_path}')
-        img = preprocess.cut_plot(input_dir / img_path, 3800, 2000, 100)
-        cv2.imwrite(str(output_dir / img_path), img)
+        img, y1, y2, x1, x2 = preprocess.cut_plot(input_dir / img_path, 3800,
+                                                  2000, 100)
+        if args.save:
+            cv2.imwrite(str(output_dir / img_path), img)
+        with open(str(output_dir / 'plot.txt'), 'a') as f:
+            f.write(f'{str(input_dir/img_path)}\t{y1}\t{y2}\t{x1}\t{x2}\n')
 
-    print('Processed images saved to', output_dir)
+    print('Result saved to', output_dir)
 
 
 if __name__ == '__main__':

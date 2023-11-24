@@ -2,7 +2,7 @@ import cv2
 import numpy as np
 
 
-def binarize_cive(img):
+def binarize_cive(img: np.ndarray) -> np.ndarray:
     """Binarize an image using the CIVE (Color Index of Vegetation Extraction)
     algorithm.
 
@@ -12,8 +12,8 @@ def binarize_cive(img):
     Returns:
     numpy.ndarray: The binarize image.
     """
-    B, G, R = cv2.split(img)
-    cive = 0.441 * R - 0.811 * G + 0.385 * B + 18.78745
+    b, g, r = cv2.split(img)
+    cive = 0.441 * r - 0.811 * g + 0.385 * b + 18.78745
     gray = cive.astype('uint8')
     _, th = cv2.threshold(gray, 0, 1, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
     return th
@@ -79,4 +79,4 @@ def cut_plot(img_path, width, height, window_size):
     y1, y2 = min_sum(y, height, window_size)
 
     img = img[y1:y2, x1:x2]
-    return img
+    return img, y1, y2, x1, x2

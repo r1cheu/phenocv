@@ -7,7 +7,8 @@ from ultralytics.engine.results import Boxes, Results
 
 def shift_predictions(results: List[Results], offsets: Sequence[Tuple[int,
                                                                       int]],
-                      src_image_shape) -> List[Results]:
+                      src_image_shape) -> Boxes:
+
     try:
         from sahi.slicing import shift_bboxes
     except ImportError:
@@ -35,7 +36,7 @@ def shift_predictions(results: List[Results], offsets: Sequence[Tuple[int,
 
 def merge_results_by_nms(results: List[Results], offsets: Sequence[Tuple[int,
                                                                          int]],
-                         src_image_shape, iou_thres) -> List[Results]:
+                         src_image_shape, iou_thres) -> Boxes:
     shifted_instances = shift_predictions(results, offsets, src_image_shape)
 
     keep = nms(shifted_instances.xyxy, shifted_instances.conf, iou_thres)

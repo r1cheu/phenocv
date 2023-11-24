@@ -11,26 +11,29 @@ from phenocv import postprocess, utils
 
 
 def get_args():
-    args = ArgumentParser()
-    args.add_argument(
+    parser = ArgumentParser()
+    parser.add_argument(
         'input_dir', type=str, default=None, help='input image dir')
-    args.add_argument('weights', type=str, default=None, help='model weights')
-    args.add_argument('--save_image', action='store_true', help='save image')
-    args.add_argument('--suffix', type=str, default='jpg', help='image suffix')
-    args.add_argument(
+    parser.add_argument(
+        'weights', type=str, default=None, help='model weights')
+    parser.add_argument('--save_image', action='store_true', help='save image')
+    parser.add_argument(
+        '--suffix', type=str, default='jpg', help='image suffix')
+    parser.add_argument(
         '--output_dir', type=str, default=None, help='output image dir')
-    args.add_argument(
+    parser.add_argument(
         '--device', type=str, default='cude:0', help='device to use')
-    args.add_argument(
+    parser.add_argument(
         '--conf-thr', type=float, default=0.3, help='score threshold')
-    args.add_argument(
+    parser.add_argument(
         '--overlap-iou-thr', type=float, default=0.25, help='iou threshold')
-    args.add_argument(
+    parser.add_argument(
         '--patch-size', type=int, default=1000, help='patch size')
-    args.add_argument(
+    parser.add_argument(
         '--patch-overlap', type=float, default=0.25, help='patch overlap')
-    args.add_argument('--batch-size', type=int, default=16, help='batch size')
-    return args.parse_args()
+    parser.add_argument(
+        '--batch-size', type=int, default=16, help='batch size')
+    return parser.parse_args()
 
 
 def main():
@@ -43,7 +46,7 @@ def main():
     # get image paths
     img_paths = utils.scandir(input_dir, suffix=args.suffix, recursive=False)
 
-    model = YOLO(args.weights)
+    model = YOLO(args.weights).to(args.device)
 
     pbar = tqdm(img_paths)
     for img_path in pbar:
