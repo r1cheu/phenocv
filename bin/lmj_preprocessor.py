@@ -15,6 +15,11 @@ def get_args():
     parser.add_argument(
         '-o', '--output-dir', type=str, default=None, help='output image dir')
     parser.add_argument(
+        '-s',
+        '--save',
+        action='store_true',
+        help='whether to save the extracted plots')
+    parser.add_argument(
         '--resize-long-side', type=int, default=1024, help='resize long side')
     return parser.parse_args()
 
@@ -26,9 +31,7 @@ if __name__ == '__main__':
     input_dir, output_dir = utils.prepare_io_dir(args.input_dir,
                                                  args.output_dir)
 
-    img_paths = utils.scandir(
-        args.input_dir, suffix=args.suffix, recursive=False)
-    img_paths = sorted(img_paths)  # sort the img_paths
+    img_paths = utils.scandir(args.input_dir, suffix=args.suffix)
 
     pbar = tqdm(img_paths)
 
@@ -36,4 +39,5 @@ if __name__ == '__main__':
         pbar.set_description(f'Extracting {img_path}')
         img = preprocess.LMJImagePreprocessor(
             input_dir / img_path, resize_long_side=args.resize_long_side)
-        img.save_image(output_dir / img_path)
+        if args.save:
+            img.save_image(output_dir / img_path)

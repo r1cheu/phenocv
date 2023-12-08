@@ -1,4 +1,5 @@
 from abc import ABCMeta, abstractmethod
+from collections import namedtuple
 from logging import warning
 from pathlib import Path
 from typing import Optional, Union
@@ -8,6 +9,22 @@ import numpy as np
 import PIL
 
 from .utils import check_path
+
+BoundingBox = namedtuple('BoundingBox', ['x1', 'x2', 'y1', 'y2'])
+
+
+def resize(image, target_size=1000):
+    h, w = image.shape[:2]
+    if h < w:
+        new_h, new_w = target_size * h / w, target_size
+    else:
+        new_h, new_w = target_size, target_size * w / h
+
+    new_h, new_w = int(new_h), int(new_w)
+
+    resized_image = cv2.resize(
+        image, (new_w, new_h), interpolation=cv2.INTER_CUBIC)
+    return resized_image
 
 
 def binarize_cive(img: np.ndarray) -> np.ndarray:
@@ -59,37 +76,6 @@ def min_sum(x, length, window_size):
     return index, index + length
 
 
-def cut_plot(img_path, width, height, window_size):
-    """Cuts a plot from an image based on the specified width, height, and
-    window size.
-
-    Args:
-        img_path (str): The path to the image file.
-        width (int): The desired width of the plot. Can be obtained from
-        actual plot width.
-        height (int): The desired height of the plot. Can be obtained from
-            actual plot height.
-        window_size (int): The size of the moving average window.
-
-    Returns:
-        numpy.ndarray: The cropped plot image.
-    """
-
-    img = cv2.imread(str(img_path))
-    binary = binarize_cive(img)
-
-    x = np.apply_along_axis(np.sum, 0, binary)
-    x = moving_average(x, window_size)
-    x1, x2 = min_sum(x, width, window_size)
-
-    y = np.apply_along_axis(np.sum, 1, binary)
-    y = moving_average(y, window_size)
-    y1, y2 = min_sum(y, height, window_size)
-
-    img = img[y1:y2, x1:x2]
-    return img, y1, y2, x1, x2
-
-
 class ImagePreprocesor(metaclass=ABCMeta):
 
     def __init__(self, img_path: Union[str, Path]):
@@ -132,6 +118,11 @@ class ImagePreprocesor(metaclass=ABCMeta):
         cv2.imwrite(str(img_path), self._processed_image)
 
     @property
+    def image(self):
+        image = cv2.cvtColor(self.ori_image, cv2.COLOR_BGR2RGB)
+        return PIL.Image.fromarray(image)
+
+    @property
     def processed_image(self):
 
         if self._processed_image is None:
@@ -142,18 +133,53 @@ class ImagePreprocesor(metaclass=ABCMeta):
 
         return PIL.Image.fromarray(processed_image)
 
-    def resize(self, image, target_size=1000):
-        h, w = image.shape[:2]
-        if h < w:
-            new_h, new_w = target_size * h / w, target_size
-        else:
-            new_h, new_w = target_size, target_size * w / h
 
-        new_h, new_w = int(new_h), int(new_w)
+class H20ImagePreprocessor(ImagePreprocesor):
 
-        resized_image = cv2.resize(
-            image, (new_w, new_h), interpolation=cv2.INTER_CUBIC)
-        return resized_image
+    def __init__(
+        self,
+        img_path: str | Path,
+        width: int = 3800,
+        height: int = 2000,
+        window_size: int = 100,
+    ):
+
+        self.height = height
+        self.width = width
+        self.window_size = window_size
+        super().__init__(img_path)
+
+    def process(self):
+        """Cuts a plot from an image based on the specified width, height, and
+        window size. The width, height should be obtain from actual plant
+        density.
+
+        Args:
+            img_path (str): The path to the image file.
+            width (int): The desired width of the plot. Can be obtained from
+            actual plot width.
+            height (int): The desired height of the plot. Can be obtained from
+                actual plot height.
+            window_size (int): The size of the moving average window.
+
+        Returns:
+            numpy.ndarray: The cropped plot image.
+        """
+
+        bin_image = binarize_cive(self.ori_image)
+
+        x = np.apply_along_axis(np.sum, 0, bin_image)
+        x = moving_average(x, self.window_size)
+        x1, x2 = min_sum(x, self.width, self.window_size)
+
+        y = np.apply_along_axis(np.sum, 1, bin_image)
+        y = moving_average(y, self.window_size)
+        y1, y2 = min_sum(y, self.height, self.window_size)
+
+        self.xyxy = BoundingBox(x1=x1, x2=x2, y1=y1, y2=y2)
+
+        self._processed_image = self.ori_image[y1:y2, x1:x2]
+        self._processed_image_shape = self._processed_image.shape
 
 
 class LMJImagePreprocessor(ImagePreprocesor):
@@ -216,7 +242,7 @@ class LMJImagePreprocessor(ImagePreprocesor):
 
             # resize the image with highest quality
             if self.resize_len is not None:
-                crop_image = self.resize(crop_image, self.resize_len)
+                crop_image = resize(crop_image, self.resize_len)
 
             self._processed_image = crop_image
             self.processed_image_shape = self._processed_image.shape

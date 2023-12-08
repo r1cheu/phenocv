@@ -144,3 +144,15 @@ def check_path(path):
 
     if not Path(path).exists():
         raise FileNotFoundError('The input path does not exist.')
+
+
+def write_file(file_path, content, mode='a'):
+    """Write content to file.
+
+    Args:
+        file_path (str | :obj:`Path`): Path of the file.
+        content (str): Content to be written to the file.
+        mode (str, optional): Mode for opening the file. Defaults to 'w'.
+    """
+    with open(file_path, mode) as f:
+        f.write(content)

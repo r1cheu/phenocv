@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 from argparse import ArgumentParser
 
-import cv2
 from tqdm import tqdm
 
-from phenocv import preprocess, utils
+from phenocv import utils
+from phenocv.preprocess import H20ImagePreprocessor
 
 
 def get_args():
@@ -15,10 +15,13 @@ def get_args():
         '--output_dir',
         type=str,
         default=None,
-        help='Path to output '
-        'directory.')
+        help='Path to output directory.')
     parser.add_argument(
         '--save',
+        action='store_true',
+        help='whether to save the extracted plots')
+    parser.add_argument(
+        '--save_txt',
         action='store_true',
         help='whether to save the extracted plots')
     parser.add_argument(
@@ -27,10 +30,6 @@ def get_args():
         default='.jpg',
         help='Suffix '
         'of images to extract.')
-    parser.add_argument(
-        '--recursive',
-        action='store_true',
-        help='whether to recursively search for images in input_dir')
     return parser.parse_args()
 
 
@@ -41,18 +40,24 @@ def main():
     input_dir, output_dir = utils.prepare_io_dir(args.input_dir,
                                                  args.output_dir)
     # get image paths
-    img_paths = utils.scandir(
-        input_dir, suffix=args.suffix, recursive=args.recursive)
+    img_paths = utils.scandir(input_dir, suffix=args.suffix)
+
+    if args.save_txt:
+        utils.write_file(output_dir / 'plot.txt', 'source\ty1\ty2\tx1\tx2\n')
     pbar = tqdm(img_paths)
     for img_path in pbar:
         pbar.set_description(f'Processing {img_path}')
-        img, y1, y2, x1, x2 = preprocess.cut_plot(input_dir / img_path, 3800,
-                                                  2000, 100)
-        if args.save:
-            cv2.imwrite(str(output_dir / img_path), img)
-        with open(str(output_dir / 'plot.txt'), 'a') as f:
-            f.write(f'{str(input_dir/img_path)}\t{y1}\t{y2}\t{x1}\t{x2}\n')
 
+        img = H20ImagePreprocessor(input_dir / img_path)
+
+        if args.save:
+            img.save_image(output_dir / img_path)
+
+        if args.save_txt:
+            xyxy = img.xyxy
+            utils.write_file(
+                output_dir / 'plot.txt',
+                f'{img_path}\t{xyxy.y1}\t{xyxy.y2}\t{xyxy.x1}\t{xyxy.x2}\n')
     print('Result saved to', output_dir)
 
 

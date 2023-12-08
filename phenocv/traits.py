@@ -228,8 +228,8 @@ class HeadingDateExtractor(TraitExtractor):
 
         return percent_index
 
-    @classmethod
-    def _percent_format(self, percent: float):
+    @staticmethod
+    def _percent_format(percent: float):
         return f'{int(percent * 100)}%'
 
     def _cal_heading_stage(self):
