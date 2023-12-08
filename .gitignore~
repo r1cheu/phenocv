@@ -115,7 +115,7 @@ data
 *.log.json
 work_dirs/
 raw_data/
-yolo_workdirs/
+yolo/
 tests/
 label_studio/
 # Pytorch
