@@ -26,6 +26,8 @@ def get_args():
     parser.add_argument(
         '--conf-thr', type=float, default=0.3, help='score threshold')
     parser.add_argument(
+        '--iou-thr', type=float, default=0.5, help='iou threshold')
+    parser.add_argument(
         '--overlap-iou-thr', type=float, default=0.25, help='iou threshold')
     parser.add_argument(
         '--patch-size', type=int, default=1000, help='patch size')
@@ -70,7 +72,11 @@ def main():
             for sliced_image in sliced_image_obj.images[start:end]:
                 images.append(sliced_image)
             slice_results.extend(
-                model.predict(images, conf=0.3, iou=0.5, verbose=False))
+                model.predict(
+                    images,
+                    conf=args.conf_thr,
+                    iou=args.iou_thr,
+                    verbose=False))
 
             if end >= len(sliced_image_obj):
                 break

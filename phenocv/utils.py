@@ -134,3 +134,13 @@ def exec_par(cmds, max_proc=None, verbose=False):
         # wait for all to finish
         for i in range(len(p)):
             p[i].wait()
+
+
+def check_path(path):
+
+    if not isinstance(path, (str, Path)):
+        raise TypeError('The input path must be a string or a Path object,' +
+                        f'but got {type(path)}')
+
+    if not Path(path).exists():
+        raise FileNotFoundError('The input path does not exist.')
