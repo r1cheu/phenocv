@@ -1,0 +1,783 @@
+{
+  "event": "ANNOTATION_UPDATED",
+  "job_id": "1702106102",
+  "data": {
+    "annotation": {
+      "id": 1966,
+      "result": [
+        {
+          "original_width": 1000,
+          "original_height": 1000,
+          "image_rotation": 0,
+          "value": {
+            "x": 20.599999999999998,
+            "y": 60.8,
+            "width": 29.599999999999998,
+            "height": 22.7,
+            "rotation": 0,
+            "rectanglelabels": [
+              "panicle"
+            ]
+          },
+          "id": "Q6GOOy",
+          "from_name": "RectangleLabels",
+          "to_name": "image",
+          "type": "rectanglelabels",
+          "origin": "manual"
+        },
+        {
+          "original_width": 1000,
+          "original_height": 1000,
+          "image_rotation": 0,
+          "value": {
+            "x": 21.6,
+            "y": 25.4,
+            "width": 14.6,
+            "height": 34,
+            "rotation": 0,
+            "rectanglelabels": [
+              "panicle"
+            ]
+          },
+          "id": "tDj87A",
+          "from_name": "RectangleLabels",
+          "to_name": "image",
+          "type": "rectanglelabels",
+          "origin": "manual"
+        },
+        {
+          "original_width": 1000,
+          "original_height": 1000,
+          "image_rotation": 0,
+          "value": {
+            "x": 46.84852734922853,
+            "y": 10.317671809256662,
+            "width": 25.770967741935564,
+            "height": 25.882328190743344,
+            "rotation": 0,
+            "rectanglelabels": [
+              "panicle"
+            ]
+          },
+          "id": "ONxxzm",
+          "from_name": "RectangleLabels",
+          "to_name": "image",
+          "type": "rectanglelabels",
+          "origin": "manual"
+        },
+        {
+          "original_width": 1000,
+          "original_height": 1000,
+          "image_rotation": 0,
+          "value": {
+            "x": 68.05736325385695,
+            "y": 1.1000000000000005,
+            "width": 28.042636746143067,
+            "height": 17.00995792426367,
+            "rotation": 0,
+            "rectanglelabels": [
+              "panicle"
+            ]
+          },
+          "id": "uKG3KR",
+          "from_name": "RectangleLabels",
+          "to_name": "image",
+          "type": "rectanglelabels",
+          "origin": "manual"
+        },
+        {
+          "original_width": 1000,
+          "original_height": 1000,
+          "image_rotation": 0,
+          "value": {
+            "x": 51.300000000000004,
+            "y": 81.89999999999999,
+            "width": 6.5,
+            "height": 18.099999999999998,
+            "rotation": 0,
+            "rectanglelabels": [
+              "panicle"
+            ]
+          },
+          "id": "pNSsX9",
+          "from_name": "RectangleLabels",
+          "to_name": "image",
+          "type": "rectanglelabels",
+          "origin": "manual"
+        }
+      ],
+      "was_cancelled": false,
+      "ground_truth": false,
+      "created_at": "2023-06-28T02:00:47.099502Z",
+      "updated_at": "2023-12-09T07:15:02.012281Z",
+      "draft_created_at": null,
+      "lead_time": 122.774,
+      "prediction": {
+        "id": 70856,
+        "model_version": "undefined",
+        "created_ago": "4\u00a0weeks",
+        "result": [
+          {
+            "id": "ad52fafd81",
+            "type": "rectanglelabels",
+            "value": {
+              "x": 46.828924560546874,
+              "y": 10.460076904296875,
+              "width": 25.712707519531254,
+              "height": 25.578927612304685,
+              "rotation": 0,
+              "rectanglelabels": [
+                "panicle"
+              ]
+            },
+            "to_name": "image",
+            "from_name": "RectangleLabels",
+            "image_rotation": 0,
+            "original_width": 1000,
+            "original_height": 1000
+          },
+          {
+            "id": "0ae624d7c3",
+            "type": "rectanglelabels",
+            "value": {
+              "x": 26.695449829101562,
+              "y": 25.518624877929685,
+              "width": 9.620046997070313,
+              "height": 33.98377380371094,
+              "rotation": 0,
+              "rectanglelabels": [
+                "panicle"
+              ]
+            },
+            "to_name": "image",
+            "from_name": "RectangleLabels",
+            "image_rotation": 0,
+            "original_width": 1000,
+            "original_height": 1000
+          },
+          {
+            "id": "8805fa8d3d",
+            "type": "rectanglelabels",
+            "value": {
+              "x": 50.796896362304686,
+              "y": 82.2618408203125,
+              "width": 7.378781127929687,
+              "height": 17.721020507812497,
+              "rotation": 0,
+              "rectanglelabels": [
+                "panicle"
+              ]
+            },
+            "to_name": "image",
+            "from_name": "RectangleLabels",
+            "image_rotation": 0,
+            "original_width": 1000,
+            "original_height": 1000
+          },
+          {
+            "id": "b7b8848c1a",
+            "type": "rectanglelabels",
+            "value": {
+              "x": 66.29357299804688,
+              "y": 0.8459493637084962,
+              "width": 30.888354492187496,
+              "height": 17.784482765197755,
+              "rotation": 0,
+              "rectanglelabels": [
+                "panicle"
+              ]
+            },
+            "to_name": "image",
+            "from_name": "RectangleLabels",
+            "image_rotation": 0,
+            "original_width": 1000,
+            "original_height": 1000
+          },
+          {
+            "id": "dfc1734c7a",
+            "type": "rectanglelabels",
+            "value": {
+              "x": 20.500778198242188,
+              "y": 60.72884521484375,
+              "width": 29.83893127441406,
+              "height": 23.22279052734375,
+              "rotation": 0,
+              "rectanglelabels": [
+                "panicle"
+              ]
+            },
+            "to_name": "image",
+            "from_name": "RectangleLabels",
+            "image_rotation": 0,
+            "original_width": 1000,
+            "original_height": 1000
+          },
+          {
+            "id": "5b1622b13e",
+            "type": "rectanglelabels",
+            "value": {
+              "x": 28.874578857421874,
+              "y": 0.01618117094039917,
+              "width": 21.395904541015625,
+              "height": 9.494268810749054,
+              "rotation": 0,
+              "rectanglelabels": [
+                "panicle"
+              ]
+            },
+            "to_name": "image",
+            "from_name": "RectangleLabels",
+            "image_rotation": 0,
+            "original_width": 1000,
+            "original_height": 1000
+          },
+          {
+            "id": "b04f2bb3b2",
+            "type": "rectanglelabels",
+            "value": {
+              "x": 3.559333038330078,
+              "y": 0.014897435903549194,
+              "width": 12.511066436767578,
+              "height": 6.910295587778091,
+              "rotation": 0,
+              "rectanglelabels": [
+                "panicle"
+              ]
+            },
+            "to_name": "image",
+            "from_name": "RectangleLabels",
+            "image_rotation": 0,
+            "original_width": 1000,
+            "original_height": 1000
+          },
+          {
+            "id": "db51d23431",
+            "type": "rectanglelabels",
+            "value": {
+              "x": 45.77897644042969,
+              "y": 57.3896728515625,
+              "width": 27.57711486816406,
+              "height": 11.260076904296875,
+              "rotation": 0,
+              "rectanglelabels": [
+                "panicle"
+              ]
+            },
+            "to_name": "image",
+            "from_name": "RectangleLabels",
+            "image_rotation": 0,
+            "original_width": 1000,
+            "original_height": 1000
+          },
+          {
+            "id": "604366653f",
+            "type": "rectanglelabels",
+            "value": {
+              "x": 88.06283569335938,
+              "y": 26.100375366210937,
+              "width": 11.9323486328125,
+              "height": 24.056427001953125,
+              "rotation": 0,
+              "rectanglelabels": [
+                "panicle"
+              ]
+            },
+            "to_name": "image",
+            "from_name": "RectangleLabels",
+            "image_rotation": 0,
+            "original_width": 1000,
+            "original_height": 1000
+          },
+          {
+            "id": "6637553eb7",
+            "type": "rectanglelabels",
+            "value": {
+              "x": 8.966767883300781,
+              "y": 45.029266357421875,
+              "width": 15.368965148925781,
+              "height": 13.303094482421876,
+              "rotation": 0,
+              "rectanglelabels": [
+                "panicle"
+              ]
+            },
+            "to_name": "image",
+            "from_name": "RectangleLabels",
+            "image_rotation": 0,
+            "original_width": 1000,
+            "original_height": 1000
+          },
+          {
+            "id": "6fc8bd54bf",
+            "type": "rectanglelabels",
+            "value": {
+              "x": 12.27381820678711,
+              "y": 79.70691528320313,
+              "width": 11.124465179443359,
+              "height": 11.392474365234374,
+              "rotation": 0,
+              "rectanglelabels": [
+                "panicle"
+              ]
+            },
+            "to_name": "image",
+            "from_name": "RectangleLabels",
+            "image_rotation": 0,
+            "original_width": 1000,
+            "original_height": 1000
+          },
+          {
+            "id": "34360349ed",
+            "type": "rectanglelabels",
+            "value": {
+              "x": 38.235897827148435,
+              "y": 46.13732604980469,
+              "width": 17.620156860351564,
+              "height": 6.956002807617187,
+              "rotation": 0,
+              "rectanglelabels": [
+                "panicle"
+              ]
+            },
+            "to_name": "image",
+            "from_name": "RectangleLabels",
+            "image_rotation": 0,
+            "original_width": 1000,
+            "original_height": 1000
+          },
+          {
+            "id": "e0606362df",
+            "type": "rectanglelabels",
+            "value": {
+              "x": 1.3650543212890625,
+              "y": 82.76593017578125,
+              "width": 11.399473571777344,
+              "height": 10.8446044921875,
+              "rotation": 0,
+              "rectanglelabels": [
+                "panicle"
+              ]
+            },
+            "to_name": "image",
+            "from_name": "RectangleLabels",
+            "image_rotation": 0,
+            "original_width": 1000,
+            "original_height": 1000
+          },
+          {
+            "id": "647a7da74f",
+            "type": "rectanglelabels",
+            "value": {
+              "x": 0.008234754204750061,
+              "y": 70.6653076171875,
+              "width": 7.58588145673275,
+              "height": 6.165264892578125,
+              "rotation": 0,
+              "rectanglelabels": [
+                "panicle"
+              ]
+            },
+            "to_name": "image",
+            "from_name": "RectangleLabels",
+            "image_rotation": 0,
+            "original_width": 1000,
+            "original_height": 1000
+          },
+          {
+            "id": "1bca83329c",
+            "type": "rectanglelabels",
+            "value": {
+              "x": 34.13741760253906,
+              "y": 31.465768432617185,
+              "width": 10.562911987304688,
+              "height": 22.633724975585938,
+              "rotation": 0,
+              "rectanglelabels": [
+                "panicle"
+              ]
+            },
+            "to_name": "image",
+            "from_name": "RectangleLabels",
+            "image_rotation": 0,
+            "original_width": 1000,
+            "original_height": 1000
+          },
+          {
+            "id": "0ccaa83f0d",
+            "type": "rectanglelabels",
+            "value": {
+              "x": 73.18400268554687,
+              "y": 42.06779479980469,
+              "width": 16.456439208984374,
+              "height": 5.7477783203125,
+              "rotation": 0,
+              "rectanglelabels": [
+                "panicle"
+              ]
+            },
+            "to_name": "image",
+            "from_name": "RectangleLabels",
+            "image_rotation": 0,
+            "original_width": 1000,
+            "original_height": 1000
+          },
+          {
+            "id": "a3a745f078",
+            "type": "rectanglelabels",
+            "value": {
+              "x": 3.8112758636474613,
+              "y": 9.92757797241211,
+              "width": 9.721068191528321,
+              "height": 27.279178619384766,
+              "rotation": 0,
+              "rectanglelabels": [
+                "panicle"
+              ]
+            },
+            "to_name": "image",
+            "from_name": "RectangleLabels",
+            "image_rotation": 0,
+            "original_width": 1000,
+            "original_height": 1000
+          },
+          {
+            "id": "e28b5debf5",
+            "type": "rectanglelabels",
+            "value": {
+              "x": 58.70288085937499,
+              "y": 56.73052368164062,
+              "width": 10.026007080078125,
+              "height": 7.648785400390625,
+              "rotation": 0,
+              "rectanglelabels": [
+                "panicle"
+              ]
+            },
+            "to_name": "image",
+            "from_name": "RectangleLabels",
+            "image_rotation": 0,
+            "original_width": 1000,
+            "original_height": 1000
+          },
+          {
+            "id": "3a9c518206",
+            "type": "rectanglelabels",
+            "value": {
+              "x": 58.31824340820313,
+              "y": 59.065808105468754,
+              "width": 28.035485839843748,
+              "height": 27.872369384765626,
+              "rotation": 0,
+              "rectanglelabels": [
+                "panicle"
+              ]
+            },
+            "to_name": "image",
+            "from_name": "RectangleLabels",
+            "image_rotation": 0,
+            "original_width": 1000,
+            "original_height": 1000
+          },
+          {
+            "id": "6e8b270217",
+            "type": "rectanglelabels",
+            "value": {
+              "x": 2.2497920989990234,
+              "y": 35.61283874511719,
+              "width": 20.702797317504885,
+              "height": 5.59039306640625,
+              "rotation": 0,
+              "rectanglelabels": [
+                "panicle"
+              ]
+            },
+            "to_name": "image",
+            "from_name": "RectangleLabels",
+            "image_rotation": 0,
+            "original_width": 1000,
+            "original_height": 1000
+          },
+          {
+            "id": "8148b92f8c",
+            "type": "rectanglelabels",
+            "value": {
+              "x": 45.94968872070312,
+              "y": 64.71975708007812,
+              "width": 6.39935302734375,
+              "height": 2.995172119140625,
+              "rotation": 0,
+              "rectanglelabels": [
+                "panicle"
+              ]
+            },
+            "to_name": "image",
+            "from_name": "RectangleLabels",
+            "image_rotation": 0,
+            "original_width": 1000,
+            "original_height": 1000
+          },
+          {
+            "id": "74f5427f0f",
+            "type": "rectanglelabels",
+            "value": {
+              "x": 81.22614135742188,
+              "y": 0.6149523258209229,
+              "width": 17.028039550781248,
+              "height": 17.273763799667357,
+              "rotation": 0,
+              "rectanglelabels": [
+                "panicle"
+              ]
+            },
+            "to_name": "image",
+            "from_name": "RectangleLabels",
+            "image_rotation": 0,
+            "original_width": 1000,
+            "original_height": 1000
+          },
+          {
+            "id": "354ec46582",
+            "type": "rectanglelabels",
+            "value": {
+              "x": 63.30692749023438,
+              "y": 49.137228393554686,
+              "width": 15.3645263671875,
+              "height": 8.610250854492188,
+              "rotation": 0,
+              "rectanglelabels": [
+                "panicle"
+              ]
+            },
+            "to_name": "image",
+            "from_name": "RectangleLabels",
+            "image_rotation": 0,
+            "original_width": 1000,
+            "original_height": 1000
+          },
+          {
+            "id": "fd34878b40",
+            "type": "rectanglelabels",
+            "value": {
+              "x": 71.69373168945312,
+              "y": 91.95563354492188,
+              "width": 15.744647216796876,
+              "height": 2.2898803710937496,
+              "rotation": 0,
+              "rectanglelabels": [
+                "panicle"
+              ]
+            },
+            "to_name": "image",
+            "from_name": "RectangleLabels",
+            "image_rotation": 0,
+            "original_width": 1000,
+            "original_height": 1000
+          }
+        ],
+        "score": null,
+        "cluster": null,
+        "neighbors": null,
+        "mislabeling": 0.0,
+        "created_at": "2023-05-30T08:53:22.481891Z",
+        "updated_at": "2023-05-30T08:53:22.481899Z",
+        "task": 2144
+      },
+      "result_count": 0,
+      "unique_id": "d624cf28-b4d9-4284-b6a9-df0cfc4e799e",
+      "import_id": null,
+      "last_action": null,
+      "task": 2144,
+      "project": 25,
+      "completed_by": 7,
+      "updated_by": 2,
+      "parent_prediction": 70856,
+      "parent_annotation": null,
+      "last_created_by": null
+    },
+    "project": {
+      "id": 25,
+      "task_number": 1104,
+      "finished_task_number": 1026,
+      "total_predictions_number": 1104,
+      "total_annotations_number": 1027,
+      "num_tasks_with_annotations": 1026,
+      "useful_annotation_number": 1027,
+      "ground_truth_number": 0,
+      "skipped_annotations_number": 0,
+      "title": "0530\u7a3b\u7a57",
+      "description": "",
+      "label_config": "<View>\n  <Image name=\"image\" value=\"$image\" zoom=\"true\"/>\n  <KeyPointLabels name=\"KeyPointLabels\" toName=\"image\">\n    <Label value=\"panicle\" smart=\"true\" background=\"#e51515\" showInline=\"true\"/>\n  </KeyPointLabels>\n  <RectangleLabels name=\"RectangleLabels\" toName=\"image\">\n  \t<Label value=\"panicle\" background=\"#FF0000\"/>\n  </RectangleLabels>\n  <PolygonLabels name=\"PolygonLabels\" toName=\"image\">\n  \t<Label value=\"panicle\" background=\"#FF0000\"/>\n  </PolygonLabels>\n  <BrushLabels name=\"BrushLabels\" toName=\"image\">\n  \t<Label value=\"panicle\" background=\"#FF0000\"/>\n  </BrushLabels>\n</View>",
+      "parsed_label_config": {
+        "KeyPointLabels": {
+          "type": "KeyPointLabels",
+          "to_name": [
+            "image"
+          ],
+          "inputs": [
+            {
+              "type": "Image",
+              "value": "image"
+            }
+          ],
+          "labels": [
+            "panicle"
+          ],
+          "labels_attrs": {
+            "panicle": {
+              "value": "panicle",
+              "smart": "true",
+              "background": "#e51515",
+              "showInline": "true"
+            }
+          }
+        },
+        "RectangleLabels": {
+          "type": "RectangleLabels",
+          "to_name": [
+            "image"
+          ],
+          "inputs": [
+            {
+              "type": "Image",
+              "value": "image"
+            }
+          ],
+          "labels": [
+            "panicle"
+          ],
+          "labels_attrs": {
+            "panicle": {
+              "value": "panicle",
+              "background": "#FF0000"
+            }
+          }
+        },
+        "PolygonLabels": {
+          "type": "PolygonLabels",
+          "to_name": [
+            "image"
+          ],
+          "inputs": [
+            {
+              "type": "Image",
+              "value": "image"
+            }
+          ],
+          "labels": [
+            "panicle"
+          ],
+          "labels_attrs": {
+            "panicle": {
+              "value": "panicle",
+              "background": "#FF0000"
+            }
+          }
+        },
+        "BrushLabels": {
+          "type": "BrushLabels",
+          "to_name": [
+            "image"
+          ],
+          "inputs": [
+            {
+              "type": "Image",
+              "value": "image"
+            }
+          ],
+          "labels": [
+            "panicle"
+          ],
+          "labels_attrs": {
+            "panicle": {
+              "value": "panicle",
+              "background": "#FF0000"
+            }
+          }
+        }
+      },
+      "expert_instruction": "",
+      "show_instruction": false,
+      "show_skip_button": true,
+      "enable_empty_annotation": true,
+      "reveal_preannotations_interactively": false,
+      "show_annotation_history": false,
+      "show_collab_predictions": true,
+      "evaluate_predictions_automatically": false,
+      "token": "f65e9fb999baafe4",
+      "result_count": 0,
+      "color": "#FFFFFF",
+      "maximum_annotations": 1,
+      "min_annotations_to_start_training": 0,
+      "control_weights": {
+        "KeyPointLabels": {
+          "overall": 1.0,
+          "type": "KeyPointLabels",
+          "labels": {
+            "panicle": 1.0
+          }
+        },
+        "RectangleLabels": {
+          "overall": 1.0,
+          "type": "RectangleLabels",
+          "labels": {
+            "panicle": 1.0
+          }
+        },
+        "PolygonLabels": {
+          "overall": 1.0,
+          "type": "PolygonLabels",
+          "labels": {
+            "panicle": 1.0
+          }
+        },
+        "BrushLabels": {
+          "overall": 1.0,
+          "type": "BrushLabels",
+          "labels": {
+            "panicle": 1.0
+          }
+        }
+      },
+      "model_version": "undefined",
+      "data_types": {
+        "image": "Image"
+      },
+      "is_draft": false,
+      "is_published": false,
+      "created_at": "2023-05-30T08:51:36.524996Z",
+      "updated_at": "2023-05-30T08:53:22.487387Z",
+      "sampling": "Sequential sampling",
+      "skip_queue": "REQUEUE_FOR_OTHERS",
+      "show_ground_truth_first": false,
+      "show_overlap_first": false,
+      "overlap_cohort_percentage": 100,
+      "task_data_login": null,
+      "task_data_password": null,
+      "pinned_at": null,
+      "organization": 1,
+      "created_by": 2
+    },
+    "task": {
+      "id": 2144,
+      "data": {
+        "image": "/data/local-files/?d=rawdata/0530_patch/image/LingShui-20230407-R310_7.jpg"
+      },
+      "meta": {},
+      "created_at": "2023-05-30T08:53:22.194101Z",
+      "updated_at": "2023-12-09T07:15:02.183563Z",
+      "is_labeled": true,
+      "overlap": 1,
+      "inner_id": 1104,
+      "total_annotations": 1,
+      "cancelled_annotations": 0,
+      "total_predictions": 1,
+      "comment_count": 0,
+      "unresolved_comment_count": 0,
+      "last_comment_updated_at": null,
+      "project": 25,
+      "updated_by": 2,
+      "file_upload": 377,
+      "comment_authors": []
+    }
+  }
+}

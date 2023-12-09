@@ -32,3 +32,6 @@ weights/
 *.pt
 phenocv.code-workspace
 .fleet/
+
+# label studio
+./label_anything/sam/170*/
