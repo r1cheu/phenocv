@@ -105,7 +105,7 @@ if __name__ == '__main__':
         author_email='chenrulei@cemps.ac.cn',
         keywords='rice, computer vision, phenotyping, deep learning',
         url='https://github.com/r1cheu/phenocv',
-        packages=find_packages(exclude=('yolo', 'bin', 'label_studio')),
+        packages=find_packages(exclude=('yolo', 'bin', 'label_anything')),
         include_package_data=True,
         classifiers=[
             'Development Status :: 4 - Beta',
