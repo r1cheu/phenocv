@@ -6,9 +6,11 @@
 
 **phenocv** it's a private use code library. Be free to use it, but no guarantee for any bugs.
 
-For label-studio semi-automatic annotation, please refer to [label-studio](https://github.com/open-mmlab/playground)
-For mmdection training, please refer to [mmdection](https://github.com/open-mmlab/mmdetection)
-For yolo training, please refer to [Ultralytics](https://github.com/ultralytics/ultralytics)
+For label-studio semi-automatic annotation, please refer to [label-studio](https://github.com/open-mmlab/playground).
+
+For mmdection training, please refer to [mmdection](https://github.com/open-mmlab/mmdetection).
+
+For yolo training, please refer to [Ultralytics](https://github.com/ultralytics/ultralytics).
 
 ## Installation
 
