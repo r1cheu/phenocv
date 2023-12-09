@@ -1,0 +1,169 @@
+{
+  "event": "PROJECT_UPDATED",
+  "job_id": "1702039870",
+  "data": {
+    "project": {
+      "id": 26,
+      "task_number": 0,
+      "finished_task_number": 0,
+      "total_predictions_number": 0,
+      "total_annotations_number": 0,
+      "num_tasks_with_annotations": 0,
+      "useful_annotation_number": 0,
+      "ground_truth_number": 0,
+      "skipped_annotations_number": 0,
+      "title": "\u7a3b\u88c5\u6807\u6ce8-\u521d\u59cb",
+      "description": "",
+      "label_config": "<View>\n  <Image name=\"image\" value=\"$image\" zoom=\"true\"/>\n  <KeyPointLabels name=\"KeyPointLabels\" toName=\"image\">\n    <Label value=\"\u7a3b\u6869\" smart=\"true\" background=\"#7FCCFF\" showInline=\"true\"/>\n  </KeyPointLabels>\n  <RectangleLabels name=\"RectangleLabels\" toName=\"image\">\n  \t<Label value=\"\u7a3b\u6869\" background=\"#7FCCFF\"/>\n  </RectangleLabels>\n  <PolygonLabels name=\"PolygonLabels\" toName=\"image\">\n  \t<Label value=\"\u7a3b\u6869\" background=\"#7FCCFF\"/>\n  </PolygonLabels>\n  <BrushLabels name=\"BrushLabels\" toName=\"image\">\n  \t<Label value=\"\u7a3b\u6869\" background=\"#7FCCFF\"/>\n  </BrushLabels>\n</View>",
+      "parsed_label_config": {
+        "KeyPointLabels": {
+          "type": "KeyPointLabels",
+          "to_name": [
+            "image"
+          ],
+          "inputs": [
+            {
+              "type": "Image",
+              "value": "image"
+            }
+          ],
+          "labels": [
+            "\u7a3b\u6869"
+          ],
+          "labels_attrs": {
+            "\u7a3b\u6869": {
+              "value": "\u7a3b\u6869",
+              "smart": "true",
+              "background": "#7FCCFF",
+              "showInline": "true"
+            }
+          }
+        },
+        "RectangleLabels": {
+          "type": "RectangleLabels",
+          "to_name": [
+            "image"
+          ],
+          "inputs": [
+            {
+              "type": "Image",
+              "value": "image"
+            }
+          ],
+          "labels": [
+            "\u7a3b\u6869"
+          ],
+          "labels_attrs": {
+            "\u7a3b\u6869": {
+              "value": "\u7a3b\u6869",
+              "background": "#7FCCFF"
+            }
+          }
+        },
+        "PolygonLabels": {
+          "type": "PolygonLabels",
+          "to_name": [
+            "image"
+          ],
+          "inputs": [
+            {
+              "type": "Image",
+              "value": "image"
+            }
+          ],
+          "labels": [
+            "\u7a3b\u6869"
+          ],
+          "labels_attrs": {
+            "\u7a3b\u6869": {
+              "value": "\u7a3b\u6869",
+              "background": "#7FCCFF"
+            }
+          }
+        },
+        "BrushLabels": {
+          "type": "BrushLabels",
+          "to_name": [
+            "image"
+          ],
+          "inputs": [
+            {
+              "type": "Image",
+              "value": "image"
+            }
+          ],
+          "labels": [
+            "\u7a3b\u6869"
+          ],
+          "labels_attrs": {
+            "\u7a3b\u6869": {
+              "value": "\u7a3b\u6869",
+              "background": "#7FCCFF"
+            }
+          }
+        }
+      },
+      "expert_instruction": "",
+      "show_instruction": false,
+      "show_skip_button": true,
+      "enable_empty_annotation": true,
+      "reveal_preannotations_interactively": false,
+      "show_annotation_history": false,
+      "show_collab_predictions": true,
+      "evaluate_predictions_automatically": false,
+      "token": "10d3062ede5b8fc2",
+      "result_count": 0,
+      "color": "#FFFFFF",
+      "maximum_annotations": 1,
+      "min_annotations_to_start_training": 0,
+      "control_weights": {
+        "KeyPointLabels": {
+          "overall": 1.0,
+          "type": "KeyPointLabels",
+          "labels": {
+            "\u7a3b\u6869": 1.0
+          }
+        },
+        "RectangleLabels": {
+          "overall": 1.0,
+          "type": "RectangleLabels",
+          "labels": {
+            "\u7a3b\u6869": 1.0
+          }
+        },
+        "PolygonLabels": {
+          "overall": 1.0,
+          "type": "PolygonLabels",
+          "labels": {
+            "\u7a3b\u6869": 1.0
+          }
+        },
+        "BrushLabels": {
+          "overall": 1.0,
+          "type": "BrushLabels",
+          "labels": {
+            "\u7a3b\u6869": 1.0
+          }
+        }
+      },
+      "model_version": "",
+      "data_types": {
+        "image": "Image"
+      },
+      "is_draft": false,
+      "is_published": false,
+      "created_at": "2023-12-08T12:46:56.022918Z",
+      "updated_at": "2023-12-08T12:51:10.536750Z",
+      "sampling": "Sequential sampling",
+      "skip_queue": "REQUEUE_FOR_OTHERS",
+      "show_ground_truth_first": false,
+      "show_overlap_first": false,
+      "overlap_cohort_percentage": 100,
+      "task_data_login": null,
+      "task_data_password": null,
+      "pinned_at": null,
+      "organization": 1,
+      "created_by": 2
+    }
+  }
+}

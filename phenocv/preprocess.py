@@ -76,7 +76,7 @@ def min_sum(x, length, window_size):
     return index, index + length
 
 
-class ImagePreprocesor(metaclass=ABCMeta):
+class ImageExtractor(metaclass=ABCMeta):
 
     def __init__(self, img_path: Union[str, Path]):
 
@@ -134,7 +134,7 @@ class ImagePreprocesor(metaclass=ABCMeta):
         return PIL.Image.fromarray(processed_image)
 
 
-class H20ImagePreprocessor(ImagePreprocesor):
+class H20ImageExtractor(ImageExtractor):
 
     def __init__(
         self,
@@ -182,7 +182,7 @@ class H20ImagePreprocessor(ImagePreprocesor):
         self._processed_image_shape = self._processed_image.shape
 
 
-class LMJImagePreprocessor(ImagePreprocesor):
+class LMJImageExtractor(ImageExtractor):
 
     def __init__(
         self,
@@ -216,6 +216,7 @@ class LMJImagePreprocessor(ImagePreprocesor):
                     f': {x}, {y}, {w}, {h}, use the original image instead')
             self._processed_image = self.ori_image
             self.processed_image_shape = self.ori_image.shape
+            self.xyxy = BoundingBox(x1=0, x2=0, y1=0, y2=0)
 
         else:
             self.crop_position = dict(x1=x, y1=y, x2=x + w, y2=y + h)
@@ -237,7 +238,7 @@ class LMJImagePreprocessor(ImagePreprocesor):
                 x1 = 0
             if x2 > self.ori_image.shape[1]:
                 x2 = self.ori_image.shape[1]
-
+            self.xyxy = BoundingBox(x1=x1, x2=x2, y1=y1, y2=y2)
             crop_image = self.ori_image[y1:y2, x1:x2]
 
             # resize the image with highest quality

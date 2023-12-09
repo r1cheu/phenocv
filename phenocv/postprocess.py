@@ -8,7 +8,21 @@ from ultralytics.engine.results import Boxes, Results
 def shift_predictions(results: List[Results], offsets: Sequence[Tuple[int,
                                                                       int]],
                       src_image_shape) -> Boxes:
+    """Shifts the predicted bounding boxes based on the given offsets.
 
+    Args:
+        results (List[Results]): List of Results objects containing predicted
+          bounding boxes.
+        offsets (Sequence[Tuple[int, int]]): Sequence of (x, y) offsets to
+          shift the bounding boxes.
+        src_image_shape: Shape of the source image.
+
+    Returns:
+        Boxes: Shifted bounding boxes.
+
+    Raises:
+        ImportError: If the 'sahi' module is not installed.
+    """
     try:
         from sahi.slicing import shift_bboxes
     except ImportError:
@@ -37,6 +51,20 @@ def shift_predictions(results: List[Results], offsets: Sequence[Tuple[int,
 def merge_results_by_nms(results: List[Results], offsets: Sequence[Tuple[int,
                                                                          int]],
                          src_image_shape, iou_thres) -> Boxes:
+    """Merge the results of object detection by applying non-maximum
+    suppression (NMS).
+
+    Args:
+        results (List[Results]): List of Results objects containing the
+          predicted bounding boxes and confidence scores.
+        offsets (Sequence[Tuple[int, int]]): Sequence of offset tuples for
+          each result.
+        src_image_shape: Shape of the source image.
+        iou_thres: IoU (Intersection over Union) threshold for NMS.
+
+    Returns:
+        Boxes: Merged bounding boxes after applying NMS.
+    """
     shifted_instances = shift_predictions(results, offsets, src_image_shape)
 
     keep = nms(shifted_instances.xyxy, shifted_instances.conf, iou_thres)
