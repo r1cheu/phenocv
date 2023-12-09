@@ -34,4 +34,4 @@ phenocv.code-workspace
 .fleet/
 
 # label studio
-./label_anything/sam/170*/
+/label_anything/sam/170*/
