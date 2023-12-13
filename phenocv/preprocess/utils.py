@@ -2,7 +2,7 @@ import cv2
 import numpy as np
 
 
-def resize(image, target_size=1000):
+def resize(image: np.ndarray, target_size=1000):
     h, w = image.shape[:2]
     if h < w:
         new_h, new_w = target_size * h / w, target_size
@@ -10,9 +10,12 @@ def resize(image, target_size=1000):
         new_h, new_w = target_size, target_size * w / h
 
     new_h, new_w = int(new_h), int(new_w)
+    if h > new_h:
+        inter = cv2.INTER_AREA
+    else:
+        inter = cv2.INTER_CUBIC
 
-    resized_image = cv2.resize(
-        image, (new_w, new_h), interpolation=cv2.INTER_CUBIC)
+    resized_image = cv2.resize(image, (new_w, new_h), interpolation=inter)
     return resized_image
 
 

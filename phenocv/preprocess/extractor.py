@@ -50,7 +50,7 @@ class ImageExtractor(metaclass=ABCMeta):
         img (numpy.ndarray): The image.
         img_path (str): The path to the image file.
         """
-        if self._processed_image is None:
+        if not self._processed:
             self.process()
         if img_path is None:
             img_path = self.image_path.stem + '_processed' + \
@@ -181,7 +181,7 @@ class ResizeExtractor(ImageExtractor):
     def __init__(
         self,
         img_path: Union[str, Path],
-        resize_long_side: Optional[int] = None,
+        resize_long_side: Optional[int] = 1280,
     ):
         self.resize_len = resize_long_side
         super().__init__(img_path)

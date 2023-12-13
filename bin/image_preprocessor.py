@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
+import os
 from argparse import ArgumentParser
 
 from tqdm import tqdm
 
-from phenocv import utils
 from phenocv.preprocess import (H20ImageExtractor, LMJImageExtractor,
                                 ResizeExtractor)
+from phenocv.utils import DictAction, prepare_io_dir, scandir, write_file
 
 
 def get_args():
@@ -30,8 +31,14 @@ def get_args():
         '--suffix',
         type=str,
         default='.jpg',
-        help='Suffix '
-        'of images to extract.')
+        help='Suffix of images to extract.')
+    parser.add_argument(
+        '--resume', action='store_true', help='whether to resume')
+    parser.add_argument(
+        '--ext_args',
+        nargs='+',
+        action=DictAction,
+        help='kwargs for Extractor')
     return parser.parse_args()
 
 
@@ -39,10 +46,11 @@ def main():
 
     args = get_args()
     # prepare output directory
-    input_dir, output_dir = utils.prepare_io_dir(args.input_dir,
-                                                 args.output_dir)
+    input_dir, output_dir = prepare_io_dir(
+        args.input_dir, args.output_dir, resume=args.resume)
     # get image paths
-    img_paths = utils.scandir(input_dir, suffix=args.suffix)
+    img_paths = list(scandir(input_dir, suffix=args.suffix))
+    init_args = args.ext_args
 
     if args.type.lower() == 'h20':
         extractor = H20ImageExtractor
@@ -57,20 +65,30 @@ def main():
 
     if args.save_txt:
         txt_path = output_dir / 'extract.txt'
-        utils.write_file(txt_path, 'source\ty1\ty2\tx1\tx2\n')
+        write_file(txt_path, 'source\ty1\ty2\tx1\tx2\n')
 
     pbar = tqdm(img_paths)
 
     for img_path in pbar:
         pbar.set_description(f'Processing {img_path}')
-        img = extractor(input_dir / img_path)
+        in_image = input_dir / img_path
+        out_image = output_dir / img_path
+
+        if os.path.exists(out_image) and args.resume:
+            print(f'{out_image} exists, skip process.')
+            continue
+
+        if init_args is None:
+            img = extractor(in_image)
+        else:
+            img = extractor(in_image, **init_args)
 
         if args.save:
-            img.save_image(output_dir / img_path)
+            img.save_image(out_image)
 
         if args.save_txt:
             xyxy = img.xyxy
-            utils.write_file(
+            write_file(
                 txt_path,
                 f'{img_path}\t{xyxy.y1}\t{xyxy.y2}\t{xyxy.x1}\t{xyxy.x2}\n')
 
