@@ -4,7 +4,8 @@ from argparse import ArgumentParser
 from tqdm import tqdm
 
 from phenocv import utils
-from phenocv.preprocess import H20ImageExtractor, LMJImageExtractor
+from phenocv.preprocess import (H20ImageExtractor, LMJImageExtractor,
+                                ResizeExtractor)
 
 
 def get_args():
@@ -47,9 +48,12 @@ def main():
         extractor = H20ImageExtractor
     elif args.type.lower() == 'lmj':
         extractor = LMJImageExtractor
+    elif args.type == 'resize':
+        extractor = ResizeExtractor
     else:
         raise ValueError(
-            f'Args type should be LMJ or H20, but got {args.type}')
+            'Args type should chose from LMJ, H20 or Resize, but got' +
+            f'{args.type}')
 
     if args.save_txt:
         txt_path = output_dir / 'extract.txt'

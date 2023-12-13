@@ -14,8 +14,6 @@ cmd2 = (f'nohup label-studio start --internal-host {host_ip} --port 8080'
         ' --no-browser >/dev/null 2>&1 &')
 
 if __name__ == '__main__':
-    print('Starting Label Studio...')
-    print(cmd, '\n', cmd2)
     os.chdir(label_anything)
     subprocess.run(cmd, shell=True)
     subprocess.run(cmd2, shell=True)

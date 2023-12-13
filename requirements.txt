@@ -17,4 +17,4 @@ timm==0.9.12
 torch==2.1.1
 torchvision==0.16.1
 tqdm==4.66.1
-ultralytics==8.0.220
+ultralytics==8.0.227

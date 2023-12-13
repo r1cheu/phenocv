@@ -36,4 +36,4 @@ phenocv.code-workspace
 # label studio
 /label_anything/sam/[0-9]*/
 datasets
-runs
+runs/
