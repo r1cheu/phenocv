@@ -6,7 +6,7 @@
 
 **phenocv** it's a private use code library. Be free to use it, but no guarantee for any bugs.
 
-For label-studio semi-automatic annotation, please refer to [label-studio](https://github.com/open-mmlab/playground).
+For label-studio semi-automatic annotation, please refer to [playground](https://github.com/open-mmlab/playground).
 
 For mmdection training, please refer to [mmdection](https://github.com/open-mmlab/mmdetection).
 
