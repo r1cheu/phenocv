@@ -22,7 +22,7 @@ def get_args():
     parser.add_argument(
         '--output_dir', type=str, default=None, help='output image dir')
     parser.add_argument(
-        '--device', type=str, default='cude:0', help='device to use')
+        '--device', type=str, default='cuda:0', help='device to use')
     parser.add_argument(
         '--conf-thr', type=float, default=0.3, help='score threshold')
     parser.add_argument(
