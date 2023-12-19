@@ -7,7 +7,8 @@ from sahi.slicing import slice_image
 from tqdm import tqdm
 from ultralytics import YOLO
 
-from phenocv import postprocess, utils
+from phenocv import utils
+from phenocv.postprocess import merge_results_by_nms
 
 
 def get_args():
@@ -82,11 +83,12 @@ def main():
                 break
             start += args.batch_size
 
-        nms_result = postprocess.merge_results_by_nms(
+        nms_result = merge_results_by_nms(
             slice_results,
             sliced_image_obj.starting_pixels,
             src_image_shape=(height, width),
             iou_thres=args.overlap_iou_thr)
+
         if args.save_image:
             img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
             utils.save_pred(img, nms_result.xyxy,
