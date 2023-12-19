@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import os
 import subprocess
+from argparse import ArgumentParser
 
 host_ip = os.environ.get('host_ip')
 sam_weight = os.environ.get('sam_weight')
@@ -14,6 +15,18 @@ cmd2 = (f'nohup label-studio start --internal-host {host_ip} --port 8080'
         ' --no-browser >/dev/null 2>&1 &')
 
 if __name__ == '__main__':
-    os.chdir(label_anything)
-    subprocess.run(cmd, shell=True)
-    subprocess.run(cmd2, shell=True)
+    parser = ArgumentParser('Datasets converter from YOLOV5 to COCO')
+    parser.add_argument(
+        '--debug',
+        action='store_true',
+        help='debug mode',
+    )
+    args = parser.parse_args()
+    if args.debug:
+        print('cd ' + label_anything)
+        print(cmd)
+        print(cmd2)
+    else:
+        os.chdir(label_anything)
+        subprocess.run(cmd, shell=True)
+        subprocess.run(cmd2, shell=True)

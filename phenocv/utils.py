@@ -57,6 +57,37 @@ def scandir(dir_path, suffix=None, recursive=False, case_sensitive=True):
     return _scandir(dir_path, suffix, recursive, case_sensitive)
 
 
+def match_yolo_annotations(ann_dir, img_dir, img_suffix='.jpg'):
+
+    ann_dir = Path(ann_dir)
+    img_dir = Path(img_dir)
+
+    anns = scandir(ann_dir, suffix='.txt', recursive=False)
+    imgs = scandir(img_dir, suffix=img_suffix, recursive=False)
+
+    anns = sorted(list(anns))
+    imgs = sorted(list(imgs))
+
+    if len(anns) == 0 or len(imgs) == 0:
+        raise FileNotFoundError('No annotations or images found.')
+
+    for ann in anns:
+        img = ann.replace('.txt', img_suffix)
+        img = img_dir / img
+        # remove img
+        if not img.exists():
+            ann = ann_dir / ann
+            ann.unlink()
+
+    for img in imgs:
+        ann = img.replace(img_suffix, '.txt')
+        ann = ann_dir / ann
+        # remove ann
+        if not ann.exists():
+            img = img_dir / img
+            img.unlink()
+
+
 def prepare_io_dir(input_dir, output_dir, resume=False):
     """Prepare input and output directories.
 
