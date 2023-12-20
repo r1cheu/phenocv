@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 from argparse import ArgumentParser
 
-from phenocv.convert import YOLO2COCO
+from phenocv.convert import YOLOtoCOCO
 
 
 def main():
@@ -11,15 +11,9 @@ def main():
         type=str,
         default='datasets/YOLOV5',
         help='Dataset root path')
-    parser.add_argument(
-        '--mode_list',
-        type=str,
-        default='train,val',
-        help='generate which mode')
     args = parser.parse_args()
 
-    converter = YOLO2COCO(args.data_dir)
-    converter(mode_list=args.mode_list.split(','))
+    YOLOtoCOCO(args.data_dir)()
 
 
 if __name__ == '__main__':

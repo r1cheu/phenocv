@@ -177,7 +177,7 @@ def check_path(path):
                         f'but got {type(path)}')
 
     if not Path(path).exists():
-        raise FileNotFoundError('The input path does not exist.')
+        raise FileNotFoundError(f'{path} does not exist.')
 
 
 def write_file(file_path, content, mode='a'):

@@ -1,69 +1,38 @@
 # @Author: SWHL
 # @Contact: liekkaskono@163.com
 # modified from https://github.com/RapidAI/LabelConvert/blob/main/label_convert/yolov5_to_coco.py # noqa
-import json
 import shutil
 import time
 import warnings
 from pathlib import Path
-from typing import Union
 
 import cv2
 from tqdm import tqdm
 
+from phenocv.utils import check_path
+from .base import YOLOto
 
-class YOLO2COCO:
 
-    def __init__(self, data_dir):
-        self.raw_data_dir = Path(data_dir)
+class YOLOtoCOCO(YOLOto):
 
-        self.verify_exists(self.raw_data_dir / 'images')
-        self.verify_exists(self.raw_data_dir / 'labels')
+    def __init__(self, data_dir: Path | str):
+        super().__init__(data_dir)
+        self._init_coco_json()
 
-        save_dir_name = f'{Path(self.raw_data_dir).name}_COCO'
-        self.output_dir = self.raw_data_dir.parent / save_dir_name
-        self.mkdir(self.output_dir)
+    def _init_coco_json(self):
 
-        self._init_json()
-
-    def __call__(self, mode_list: list):
-        if not mode_list:
-            raise ValueError('mode_list is empty!!')
-
-        for mode in mode_list:
-            # Read the image txt.
-            txt_path = self.raw_data_dir / f'{mode}.txt'
-            self.verify_exists(txt_path)
-            img_list = self.read_txt(txt_path)
-
-            # Create the directory of saving the new image.
-            save_img_dir = self.output_dir / f'{mode}'
-            self.mkdir(save_img_dir)
-
-            # Generate json file.
-            anno_dir = self.output_dir / 'annotations'
-            self.mkdir(anno_dir)
-
-            save_json_path = anno_dir / f'{mode}.json'
-            json_data = self.convert(img_list, save_img_dir, mode)
-
-            self.write_json(save_json_path, json_data)
-        print(f'Successfully convert, detail in {self.output_dir}')
-
-    def _init_json(self):
         classes_path = self.raw_data_dir / 'classes.txt'
-        self.verify_exists(classes_path)
+
+        self._type = 'instance'
+        self._annotation_id = 1
         self.categories = self._get_category(classes_path)
 
-        self.type = 'instances'
-        self.annotation_id = 1
-
-        self.cur_year = time.strftime('%Y', time.localtime(time.time()))
+        self._cur_date = time.strftime('%Y/%m/%d', time.localtime(time.time()))
         self.info = {
-            'year': int(self.cur_year),
+            'year': int(self._cur_date.split('/')[0]),
             'version': '1.0',
             'description': 'For object detection',
-            'date_created': self.cur_year,
+            'date_created': self._cur_date,
         }
 
     def _get_category(self, classes_path):
@@ -76,6 +45,26 @@ class YOLO2COCO:
                 'name': category,
             })
         return categories
+
+    def __call__(self):
+
+        for mode in self.mode_list:
+            # Read the image txt.
+            txt_path = self.raw_data_dir / f'{mode}.txt'
+            img_list = self.read_txt(txt_path)
+
+            # Create the directory of saving the new image.
+            save_img_dir = self.output_dir / f'{mode}'
+            save_img_dir.mkdir()
+            # Generate json file.
+            anno_dir = self.output_dir / 'annotations'
+            anno_dir.mkdir()
+
+            save_json_path = anno_dir / f'{mode}.json'
+            json_data = self.convert(img_list, save_img_dir, mode)
+
+            self.write_json(save_json_path, json_data)
+        print(f'Successfully convert, detail in {self.output_dir}')
 
     def convert(self, img_list, save_img_dir, mode):
         images, annotations = [], []
@@ -92,7 +81,7 @@ class YOLO2COCO:
         json_data = {
             'info': self.info,
             'images': images,
-            'type': self.type,
+            'type': self._type,
             'annotations': annotations,
             'categories': self.categories,
         }
@@ -105,10 +94,12 @@ class YOLO2COCO:
             # e.g. images/images(3).jpg
             img_path = self.raw_data_dir / img_path
 
-        self.verify_exists(img_path)
+        check_path(img_path)
+
         new_img_name = f'{img_path.stem}.jpg'
         save_img_path = save_img_dir / new_img_name
         img_src = cv2.imread(str(img_path))
+
         if img_path.suffix.lower() == '.jpg':
             shutil.copyfile(img_path, save_img_path)
         else:
@@ -116,7 +107,6 @@ class YOLO2COCO:
 
         height, width = img_src.shape[:2]
         image_info = {
-            'date_captured': self.cur_year,
             'file_name': new_img_name,
             'id': img_id,
             'height': height,
@@ -155,9 +145,9 @@ class YOLO2COCO:
                 'image_id': img_id,
                 'bbox': [],
                 'category_id': -1,
-                'id': self.annotation_id,
+                'id': self._annotation_id,
             }]
-            self.annotation_id += 1
+            self._annotation_id += 1
             return annotation
 
         annotation = []
@@ -179,27 +169,7 @@ class YOLO2COCO:
                 'image_id': img_id,
                 'bbox': bbox,
                 'category_id': int(category_id) + 1,
-                'id': self.annotation_id,
+                'id': self._annotation_id,
             })
-            self.annotation_id += 1
+            self._annotation_id += 1
         return annotation
-
-    @staticmethod
-    def read_txt(txt_path):
-        with open(str(txt_path), encoding='utf-8') as f:
-            data = list(map(lambda x: x.rstrip('\n'), f))
-        return data
-
-    @staticmethod
-    def mkdir(dir_path):
-        Path(dir_path).mkdir(parents=True, exist_ok=True)
-
-    @staticmethod
-    def verify_exists(file_path: Union[Path, str]):
-        if not Path(file_path).exists():
-            raise FileNotFoundError(f'The {file_path} is not exists!!!')
-
-    @staticmethod
-    def write_json(json_path, content: dict):
-        with open(json_path, 'w', encoding='utf-8') as f:
-            json.dump(content, f, ensure_ascii=False)
