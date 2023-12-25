@@ -125,6 +125,18 @@ class HeadingDateExtractor(TraitExtractor):
                 f'but found {list(self._data.columns)}')
 
     def _read_data(self, data_path):
+        """Read the trait data from a file.
+
+        Args:
+            data_path (str): The path to the trait data file.
+
+        Returns:
+            pandas.DataFrame: The trait data.
+
+        Raises:
+            ValueError: If the header of the trait file does not
+            match the expected format.
+        """
         with open(data_path) as f:
             first_line = f.readline()
             first_line = first_line.strip().split('\t')
@@ -168,6 +180,17 @@ class HeadingDateExtractor(TraitExtractor):
         self._cal_heading_stage()
 
     def _round_percent(self, values: np.ndarray, percent: float, pre_idx):
+        """Rounds the given percent of the maximum value in the array and
+        returns the index.
+
+        Args:
+            values (np.ndarray): The array of values.
+            percent (float): The percentage of the maximum value to round.
+            pre_idx: The index to start searching for the rounded value.
+
+        Returns:
+            int: The index of the rounded value.
+        """
 
         max_index = values.argmax()
 
