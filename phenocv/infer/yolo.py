@@ -8,47 +8,12 @@ from sklearn.cluster import DBSCAN
 from ultralytics import YOLO
 from ultralytics.engine.results import Results
 
-from phenocv.utils import draw_bounding_boxes, imshow, save_img
+from .utils import (compute_dist, cut_bbox, draw_bounding_boxes,
+                    generate_label, imshow, make_label_box_map,
+                    random_hex_color, save_img)
 
-StubbleGrid = namedtuple('StubbleGrid',
-                         ['path', 'image', 'label', 'bboxes', 'label2box'])
-
-
-def generate_label(row: int, col: int):
-    """Generate labels for each element in a 2D grid. row=2, col=2, returns
-    np.array([1-1, 1-2, 2-1, 2-2]), for example.
-
-    Args:
-        row (int): The number of rows in the grid.
-        col (int): The number of columns in the grid.
-
-    Returns:
-        numpy.ndarray: An array of labels for each element in the grid.
-    """
-    label = []
-    for i in range(row):
-        for j in range(col):
-            label.append(f'{i+1}-{j+1}')
-    return np.array(label)
-
-
-def compute_dist(current, next):
-    """Compute the Manhattan distance between two arrays after removing
-    elements where either array is equal to 0.
-
-    Parameters:
-    i (numpy.ndarray): The first array.
-    next (numpy.ndarray): The second array.
-
-    Returns:
-    numpy.ndarray: The absolute difference between the non-zero elements of
-        the two arrays.
-    """
-    index = np.any(np.stack((current == 0, next == 0)), axis=0)
-
-    current = current[~index]
-    next = next[~index]
-    return np.abs(next - current)
+ODresult = namedtuple('ODresult',
+                      ['path', 'image', 'label', 'bboxes', 'label2box'])
 
 
 class YOLOInfer(metaclass=ABCMeta):
@@ -81,7 +46,7 @@ class YOLOInfer(metaclass=ABCMeta):
         self.classes = classes
         self._results = []
 
-    def __call__(self, source, conf=0.4, iou=0.1, row=None, col=None):
+    def __call__(self, source, conf=0.4, iou=0.1):
         """Perform inference on the given source.
 
         Args:
@@ -94,16 +59,80 @@ class YOLOInfer(metaclass=ABCMeta):
                 images.
         """
         self._clear()
-        results = self.model.predict(source, conf=0.4, iou=0.1, verbose=False)
-
-        if row or col is not None:
-            assert len(results) == 1, ('Only one image is allowed when row or'
-                                       'col is specified')
+        results = self.model.predict(source, conf=conf, iou=iou, verbose=False)
 
         for _result in results:
             _result = _result.cpu().numpy()
-            result = self.process(_result, row, col)
+            result = self.process(_result)
             self._results.append(result)
+
+    def plot(self, show=False, save_dir=None, box_color=None):
+        """Plots the bounding boxes on the images and optionally saves them.
+
+        Args:
+            show (bool): Whether to show the images with bounding boxes.
+            save_dir (str): The directory to save the images. If None, the
+                images are not saved.
+
+        Returns:
+            List[np.ndarray]: The images with bounding boxes.
+        """
+        imgs = []
+
+        if save_dir is not None:
+            save_dir = Path(save_dir)
+            save_dir.mkdir()
+
+        if box_color is None:
+            box_color = random_hex_color()
+
+        for result in self._results:
+            img = result.image
+            bboxes = result.bboxes
+            label = result.label
+
+            img = draw_bounding_boxes(
+                img,
+                bboxes,
+                labels=label,
+                width=10,
+                colors=box_color,
+                font_size=70)
+
+            if save_dir is not None:
+                img_path = Path(result.path)
+                img_name = img_path.name
+                save_img(str(save_dir / img_name), img)
+
+            if show:
+                imshow(img[:, :, ::-1])
+
+        return imgs
+
+    def save_cut(self, save_dir, show=False, expand_scale=0.05):
+        """Saves the cropped images of the detected stubble.
+
+        Args:
+            save_dir (str): The directory to save the cropped images.
+            expand_scale (float): The scale factor to expand the bounding
+                boxes.
+        """
+
+        save_dir = Path(save_dir)
+        save_dir.mkdir()
+
+        for result in self._results:
+
+            img = result.image
+            bboxes = result.label2box
+
+            for label, bbox in bboxes.items():
+                bbox = cut_bbox(img, bbox, expand_scale)
+                if show:
+                    imshow(bbox[:, :, ::-1])
+                img_path = Path(result.path)
+                img_name = img_path.stem + f'_{label}' + img_path.suffix
+                save_img(str(save_dir / img_name), bbox)
 
     @property
     def results(self):
@@ -143,34 +172,6 @@ class YOLOInfer(metaclass=ABCMeta):
         return (boxes.xywhn[index], boxes.xyxy[index])
 
 
-def cut_bbox(img, bbox, scale=0):
-    """Cuts out a bounding box region from an image.
-
-    Parameters:
-    img (numpy.ndarray): The input image.
-    bbox (tuple): The bounding box coordinates in the format (x0, y0, x1, y1).
-    scale (float): The scale factor to expand the bounding box (default: 0).
-
-    Returns:
-    numpy.ndarray: The cropped image region defined by the bounding box.
-    """
-    x0, y0, x1, y1 = bbox
-
-    x0 = x0 - (x1 - x0) * scale
-    x1 = x1 + (x1 - x0) * scale
-    y0 = y0 - (y1 - y0) * scale
-    y1 = y1 + (y1 - y0) * scale
-
-    if x0 < 0 or y0 < 0 or x1 > img.shape[1] or y1 > img.shape[0]:
-
-        x0 = max(0, x0)
-        y0 = max(0, y0)
-        x1 = min(img.shape[1], x1)
-        y1 = min(img.shape[0], y1)
-
-    return img[int(y0):int(y1), int(x0):int(x1)]
-
-
 class YOLOStubbleUAV(YOLOInfer):
     """YOLOStubbleUAV is a class that performs inference using YOLO model for
     detecting stubble in UAV images.
@@ -201,7 +202,31 @@ class YOLOStubbleUAV(YOLOInfer):
         super().__init__(model, classes, devices)
         self.dist = dist
 
-    def process(self, result, row=None, col=None) -> StubbleGrid:
+    def __call__(self, source, conf=0.4, iou=0.1, row=None, col=None):
+        """Perform inference on the given source.
+
+        Args:
+            source: The source for inference.
+            conf (float): The confidence threshold for object detection.
+            iou (float): The IoU threshold for non-maximum suppression.
+            row (int): The row index of the image when processing a grid of
+                images.
+            col (int): The column index of the image when processing a grid of
+                images.
+        """
+        self._clear()
+        results = self.model.predict(source, conf=conf, iou=iou, verbose=False)
+
+        if row or col is not None:
+            assert len(results) == 1, ('Only one image is allowed when row or'
+                                       'col is specified')
+
+        for _result in results:
+            _result = _result.cpu().numpy()
+            result = self.process(_result, row, col)
+            self._results.append(result)
+
+    def process(self, result, row=None, col=None) -> ODresult:
         """Processes the inference result and returns a StubbleGrid object.
 
         Args:
@@ -230,80 +255,15 @@ class YOLOStubbleUAV(YOLOInfer):
         label = generate_label(bboxes.shape[0], bboxes.shape[1])
         bboxes = bboxes.reshape(-1, 4)
 
-        label2box = dict()
         non_zero = (bboxes == np.zeros(4)).any(axis=1)
-        for _label, _box in zip(label[~non_zero], bboxes[~non_zero]):
-            label2box[_label] = _box
+        label2box = make_label_box_map(label[~non_zero], bboxes[~non_zero])
 
-        return StubbleGrid(
+        return ODresult(
             image=img,
             path=result.path,
             label=label,
             bboxes=bboxes,
             label2box=label2box)
-
-    def plot(self, show=False, save_dir=None):
-        """Plots the bounding boxes on the images and optionally saves them.
-
-        Args:
-            show (bool): Whether to show the images with bounding boxes.
-            save_dir (str): The directory to save the images. If None, the
-                images are not saved.
-
-        Returns:
-            List[np.ndarray]: The images with bounding boxes.
-        """
-
-        imgs = []
-        if save_dir is not None:
-            save_dir = Path(save_dir)
-            save_dir.mkdir()
-
-        for result in self._results:
-            img = result.image
-            bboxes = result.bboxes
-            label = result.label
-
-            img = draw_bounding_boxes(
-                img,
-                bboxes,
-                labels=label,
-                width=10,
-                colors='#83D6C5',
-                font_size=70)
-
-            if save_dir is not None:
-                img_path = Path(result.path)
-                img_name = img_path.name
-                save_img(str(save_dir / img_name), img)
-
-            if show:
-                imshow(img[:, :, ::-1])
-
-        return imgs
-
-    def save_cut(self, save_dir, expand_scale=0.05):
-        """Saves the cropped images of the detected stubble.
-
-        Args:
-            save_dir (str): The directory to save the cropped images.
-            expand_scale (float): The scale factor to expand the bounding
-                boxes.
-        """
-
-        save_dir = Path(save_dir)
-        save_dir.mkdir()
-
-        for result in self._results:
-
-            img = result.image
-            bboxes = result.label2box
-
-            for label, bbox in bboxes.items():
-                bbox = cut_bbox(img, bbox, expand_scale)
-                img_path = Path(result.path)
-                img_name = img_path.stem + f'_{label}' + img_path.suffix
-                save_img(str(save_dir / img_name), bbox)
 
     def _make_stubble_grid(self, result):
         """Creates a stubble grid from the inference result.
@@ -387,3 +347,20 @@ class YOLOStubbleUAV(YOLOInfer):
                 return False
 
         return True
+
+
+class YOLOStubbleDrone(YOLOInfer):
+
+    def process(self, result: Results):
+
+        img = result.orig_img
+        _, bboxes = self._get_bbox(result)
+        label = ['stubble'] * bboxes.shape[0]
+        label2box = make_label_box_map(label=label, boxes=bboxes)
+
+        return ODresult(
+            image=img,
+            path=result.path,
+            bboxes=bboxes,
+            label=label,
+            label2box=label2box)

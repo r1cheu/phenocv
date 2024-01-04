@@ -1,3 +1,3 @@
-from .yolo import YOLOStubbleUAV
+from .yolo import YOLOStubbleDrone, YOLOStubbleUAV
 
-__all__ = ['YOLOStubbleUAV']
+__all__ = ['YOLOStubbleUAV', 'YOLOStubbleDrone']
