@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 from argparse import ArgumentParser
+from pathlib import Path
 
 from phenocv.convert import COCO2LS
 
@@ -26,7 +27,9 @@ def main():
     )
     args = parser.parse_args()
     if args.image_root_dir is not None:
-        args.image_root_url = args.image_root_url + args.image_root_dir
+        # get relative path to home dir
+        image_root_dir = Path(args.image_root_dir).relative_to(Path.home())
+        args.image_root_url = args.image_root_url + str(image_root_dir)
     converter = COCO2LS(args.input_json, args.image_root_url)
     converter()
 

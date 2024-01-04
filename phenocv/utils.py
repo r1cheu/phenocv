@@ -4,13 +4,18 @@ import os.path as osp
 import subprocess
 import sys
 import time
+import warnings
 from argparse import Action, ArgumentParser, Namespace
 from pathlib import Path
-from typing import Any, Sequence, Union
+from typing import Any, List, Optional, Sequence, Tuple, Union
 
+import cv2
+import numpy as np
 import torch
+from matplotlib import pyplot as plt
+from PIL import Image, ImageDraw, ImageFont
 from torchvision.io import write_png
-from torchvision.utils import draw_bounding_boxes
+from torchvision.utils import _parse_colors
 
 
 def scandir(dir_path, suffix=None, recursive=False, case_sensitive=True):
@@ -305,3 +310,113 @@ class DictAction(Action):
                 key, val = kv.split('=', maxsplit=1)
                 options[key] = self._parse_iterable(val)
         setattr(namespace, self.dest, options)
+
+
+def imshow(img: np.ndarray, figsz=(20, 12)):
+    fig, ax = plt.subplots(figsize=figsz)
+    ax.imshow(img)
+    ax.axis('off')
+    ax.tick_params(
+        bottom=False, left=False, labelbottom=False, labelleft=False)
+    plt.show()
+
+
+def save_img(path, img):
+    cv2.imwrite(path, img)
+
+
+def draw_bounding_boxes(
+    image: np.ndarray,
+    boxes: np.ndarray,
+    labels: Optional[List[str]] = None,
+    font: Optional[str] = None,
+    colors: Optional[Union[List[Union[str, Tuple[int, int, int]]], str,
+                           Tuple[int, int, int]]] = None,
+    fill: Optional[bool] = False,
+    width: int = 1,
+    font_size: Optional[int] = None,
+) -> np.ndarray:
+    """Draw bounding boxes on an image.
+
+    Args:
+        image (np.ndarray): The image to be drawn on. It should be in
+            (H, W, C) format.
+        boxes (np.ndarray): A tensor of shape (N, 4) containing the boxes in
+            (x1, y1, x2, y2) format.
+        labels (List[str], optional): A list containing the labels of boxes.
+            Defaults to None.
+        colors (Union[List[Union[str, Tuple[int, int, int]]], str,
+            Tuple[int, int, int]], optional):
+            A list containing the colors of boxes. Defaults to None.
+        fill (bool, optional): Whether to fill the boxes with colors.
+            Defaults to False.
+        width (int, optional): The line width of boxes. Defaults to 1.
+        font_size (int, optional): The font size of labels. Defaults to None.
+
+    Returns:
+        np.ndarray[H, W, C]: The image with drawn bounding boxes.
+    """
+
+    if not isinstance(image, np.ndarray):
+        raise TypeError(f'numpy ndarray expected, got {type(image)}')
+    elif image.dtype != np.uint8:
+        raise ValueError(f'uint8 dtype expected, got {image.dtype}')
+    elif len(image.shape) != 3:
+        raise ValueError('Pass individual images, not batches')
+    elif image.shape[-1] not in {1, 3}:
+        raise ValueError('Only grayscale and RGB images are supported')
+    elif (boxes[:, 0] > boxes[:, 2]).any() or (boxes[:, 1] > boxes[:,
+                                                                   3]).any():
+        raise ValueError('Boxes need to be in (xmin, ymin, xmax, ymax) format.'
+                         'Use torchvision.ops.box_convert to convert them')
+
+    num_boxes = boxes.shape[0]
+
+    if num_boxes == 0:
+        warnings.warn("boxes doesn't contain any box. No box was drawn")
+        return image
+
+    if labels is None:
+        labels: Union[List[str],
+                      List[None]] = [None
+                                     ] * num_boxes  # type: ignore[no-redef]
+    elif len(labels) != num_boxes:
+        raise ValueError(
+            f'Number of boxes ({num_boxes}) and labels ({len(labels)})'
+            'mismatch. Please specify labels for each box.')
+
+    colors = _parse_colors(colors, num_objects=num_boxes)
+
+    if font is None:
+        font = os.path.join(cv2.__path__[0], 'qt', 'fonts', 'DejaVuSans.ttf')
+
+    txt_font = ImageFont.truetype(font, size=font_size)
+
+    # Handle Grayscale images
+    if image.shape[-1] == 1:
+        image = np.tile(image, (3, 1, 1))
+    ndarr = image[:, :, ::-1].copy()
+    img_to_draw = Image.fromarray(ndarr)
+    img_boxes = boxes.astype(np.int64).tolist()
+
+    if fill:
+        draw = ImageDraw.Draw(img_to_draw, 'RGBA')
+    else:
+        draw = ImageDraw.Draw(img_to_draw)
+
+    for bbox, color, label in zip(img_boxes, colors,
+                                  labels):  # type: ignore[arg-type]
+        if fill:
+            fill_color = color + (100, )
+            draw.rectangle(bbox, width=width, outline=color, fill=fill_color)
+        else:
+            draw.rectangle(bbox, width=width, outline=color)
+
+        if label is not None:
+            margin = width + 1
+            draw.text((bbox[0] + margin, bbox[1] + margin),
+                      label,
+                      fill=color,
+                      font=txt_font)
+
+    return np.array(img_to_draw)[:, :, ::-1]
