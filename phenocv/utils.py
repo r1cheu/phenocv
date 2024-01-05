@@ -8,6 +8,9 @@ from argparse import Action, ArgumentParser, Namespace
 from pathlib import Path
 from typing import Any, Sequence, Union
 
+import numpy as np
+from matplotlib import pyplot as plt
+
 
 def scandir(dir_path, suffix=None, recursive=False, case_sensitive=True):
     """Scan a directory to find the interested files.
@@ -294,3 +297,13 @@ class DictAction(Action):
                 key, val = kv.split('=', maxsplit=1)
                 options[key] = self._parse_iterable(val)
         setattr(namespace, self.dest, options)
+
+
+def imshow(img: np.ndarray, figsz=(20, 12)):
+    fig, ax = plt.subplots(figsize=figsz)
+    fig.set_facecolor('#181818')
+    ax.imshow(img)
+    ax.axis('off')
+    ax.tick_params(
+        bottom=False, left=False, labelbottom=False, labelleft=False)
+    plt.show()

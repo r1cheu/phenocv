@@ -33,7 +33,7 @@ class TraitExtractor(metaclass=ABCMeta):
 
     @abstractmethod
     def _read_data(self, data_path):
-        raise NotImplementedError('filtering has not been Implemented yet')
+        raise NotImplementedError('read_data has not been Implemented yet')
 
     @abstractmethod
     def _data_filtering(self):
@@ -43,7 +43,8 @@ class TraitExtractor(metaclass=ABCMeta):
     def _trait_extract(self):
         raise NotImplementedError('tarit_extract has not been Implemented yes')
 
-    def get_trait(self):
+    @property
+    def trait(self):
         """Get the extracted traits.
 
         Returns:
@@ -53,7 +54,8 @@ class TraitExtractor(metaclass=ABCMeta):
         self._trait_extract()
         return self._result
 
-    def get_data(self):
+    @property
+    def data(self):
         """Get the trait data.
 
         Returns:
@@ -215,3 +217,46 @@ class HeadingDateExtractor(TraitExtractor):
 
         self._result[
             f'{hstart}-{hend}'] = self._result[hend] - self._result[hstart]
+
+
+class YOLOTillerExtractor(TraitExtractor):
+
+    def __init__(self, data_dir: Path):
+        super().__init__(data_path=data_dir)
+
+    def _read_data(self, data_path):
+        data_dir = Path(data_path)
+
+        txts = data_dir.glob('*.txt')
+        names = []
+        nums = []
+        for txt in txts:
+            names.append(txt.stem)
+            nums.append(self.read_txt_lines(txt))
+        return pd.DataFrame(dict(ID=names, values=nums))
+
+    def read_txt_lines(self, txt_path):
+        with open(txt_path) as f:
+            lines = [line.strip() for line in f]
+        return len(lines)
+
+    def _data_filtering(self):
+        pass
+
+    def _trait_extract(self):
+
+        data = self._data.copy()
+
+        id_pattern = r'GP\d{3}-\d{1}'
+        date_pattern = r'\d{8}'
+
+        data['Date'] = data['ID'].apply(
+            lambda x: re.search(date_pattern, x).group())
+        data['ID'] = data['ID'].apply(
+            lambda x: re.search(id_pattern, x).group())
+        data['sub_ID'] = data['ID'].apply(lambda x: x.split('-')[1])
+        data['ID'] = data['ID'].apply(lambda x: x.split('-')[0])
+
+        data = data[['ID', 'sub_ID', 'Date', 'values']]
+
+        self._result = data

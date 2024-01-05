@@ -158,7 +158,12 @@ class COCO2LS:
         Returns:
             dict: an labeling dict with Label Studio format.
         """
-        label = categories[int(annotation['category_id'])]
+        category_id = int(annotation['category_id'])
+        if category_id == -1:
+            label = 'None'
+        else:
+            label = categories[category_id]
+
         x, y, width, height = annotation['bbox']
         x, y, width, height = float(x), float(y), float(width), float(height)
         item = {

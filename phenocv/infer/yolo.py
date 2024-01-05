@@ -8,9 +8,10 @@ from sklearn.cluster import DBSCAN
 from ultralytics import YOLO
 from ultralytics.engine.results import Results
 
+from phenocv.utils import imshow
 from .utils import (compute_dist, cut_bbox, draw_bounding_boxes,
-                    generate_label, imshow, make_label_box_map,
-                    random_hex_color, save_img)
+                    generate_label, make_label_box_map, random_hex_color,
+                    save_img)
 
 ODresult = namedtuple('ODresult',
                       ['path', 'image', 'label', 'bboxes', 'label2box'])
@@ -46,7 +47,7 @@ class YOLOInfer(metaclass=ABCMeta):
         self.classes = classes
         self._results = []
 
-    def __call__(self, source, conf=0.4, iou=0.1):
+    def __call__(self, source, conf=0.25, iou=0.7):
         """Perform inference on the given source.
 
         Args:
@@ -77,8 +78,6 @@ class YOLOInfer(metaclass=ABCMeta):
         Returns:
             List[np.ndarray]: The images with bounding boxes.
         """
-        imgs = []
-
         if save_dir is not None:
             save_dir = Path(save_dir)
             save_dir.mkdir()
@@ -92,12 +91,7 @@ class YOLOInfer(metaclass=ABCMeta):
             label = result.label
 
             img = draw_bounding_boxes(
-                img,
-                bboxes,
-                labels=label,
-                width=10,
-                colors=box_color,
-                font_size=70)
+                img, bboxes, labels=label, colors=box_color, font_size=70)
 
             if save_dir is not None:
                 img_path = Path(result.path)
@@ -106,8 +100,6 @@ class YOLOInfer(metaclass=ABCMeta):
 
             if show:
                 imshow(img[:, :, ::-1])
-
-        return imgs
 
     def save_cut(self, save_dir, show=False, expand_scale=0.05):
         """Saves the cropped images of the detected stubble.
@@ -119,7 +111,7 @@ class YOLOInfer(metaclass=ABCMeta):
         """
 
         save_dir = Path(save_dir)
-        save_dir.mkdir()
+        save_dir.mkdir(exist_ok=True)
 
         for result in self._results:
 
@@ -350,17 +342,36 @@ class YOLOStubbleUAV(YOLOInfer):
 
 
 class YOLOStubbleDrone(YOLOInfer):
+    """YOLOStubbleDrone is a class that performs inference using YOLO model for
+    detecting stubble from image taken by drones.
+
+    Methods:
+        process(result: Results) ->
+            ODresult: Performs the inference process on the given result.
+    """
 
     def process(self, result: Results):
 
         img = result.orig_img
         _, bboxes = self._get_bbox(result)
-        label = ['stubble'] * bboxes.shape[0]
+
+        label = [i for i in range(1, bboxes.shape[0] + 1)]
         label2box = make_label_box_map(label=label, boxes=bboxes)
 
         return ODresult(
             image=img,
             path=result.path,
             bboxes=bboxes,
-            label=label,
+            label=None,
             label2box=label2box)
+
+
+class YOLOTillerDrone(YOLOStubbleDrone):
+    """YOLOTillerDrone is a class that performs inference using YOLO model for
+    detecting tiller from image taken by drones.
+
+    Methods:
+        process(result: Results) ->
+            ODresult: Performs the inference process on the given result.
+    """
+    pass

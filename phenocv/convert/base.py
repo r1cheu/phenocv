@@ -46,7 +46,7 @@ class YOLOto:
     @staticmethod
     def write_json(json_path, content: dict):
         with open(json_path, 'w', encoding='utf-8') as f:
-            json.dump(content, f, ensure_ascii=False)
+            json.dump(content, f, ensure_ascii=False, indent=4)
 
 
 # TODO add COCOto as a base class for COCO to other annotation format

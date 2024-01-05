@@ -143,7 +143,7 @@ class YOLOtoCOCO(YOLOto):
                 'area': 0,
                 'iscrowd': 0,
                 'image_id': img_id,
-                'bbox': [],
+                'bbox': [0, 0, 0, 0],
                 'category_id': -1,
                 'id': self._annotation_id,
             }]

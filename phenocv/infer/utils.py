@@ -5,7 +5,6 @@ from typing import List, Optional, Tuple, Union
 
 import cv2
 import numpy as np
-from matplotlib import pyplot as plt
 from PIL import Image, ImageDraw, ImageFont
 from torchvision.utils import _parse_colors
 
@@ -85,15 +84,6 @@ def cut_bbox(img, bbox, scale=0):
     return img[int(y0):int(y1), int(x0):int(x1)]
 
 
-def imshow(img: np.ndarray, figsz=(20, 12)):
-    fig, ax = plt.subplots(figsize=figsz)
-    ax.imshow(img)
-    ax.axis('off')
-    ax.tick_params(
-        bottom=False, left=False, labelbottom=False, labelleft=False)
-    plt.show()
-
-
 def save_img(path, img):
     cv2.imwrite(path, img)
 
@@ -106,7 +96,6 @@ def draw_bounding_boxes(
     colors: Optional[Union[List[Union[str, Tuple[int, int, int]]], str,
                            Tuple[int, int, int]]] = None,
     fill: Optional[bool] = False,
-    width: int = 1,
     font_size: Optional[int] = None,
 ) -> np.ndarray:
     """Draw bounding boxes on an image.
@@ -171,6 +160,7 @@ def draw_bounding_boxes(
     ndarr = image[:, :, ::-1].copy()
     img_to_draw = Image.fromarray(ndarr)
     img_boxes = boxes.astype(np.int64).tolist()
+    width = int(max(np.abs(img_boxes[0][0] - img_boxes[0][2]) / 10, 1))
 
     if fill:
         draw = ImageDraw.Draw(img_to_draw, 'RGBA')
