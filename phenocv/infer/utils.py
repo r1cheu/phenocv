@@ -127,10 +127,6 @@ def draw_bounding_boxes(
         raise ValueError('Pass individual images, not batches')
     elif image.shape[-1] not in {1, 3}:
         raise ValueError('Only grayscale and RGB images are supported')
-    elif (boxes[:, 0] > boxes[:, 2]).any() or (boxes[:, 1] > boxes[:,
-                                                                   3]).any():
-        raise ValueError('Boxes need to be in (xmin, ymin, xmax, ymax) format.'
-                         'Use torchvision.ops.box_convert to convert them')
 
     num_boxes = boxes.shape[0]
 
@@ -159,9 +155,8 @@ def draw_bounding_boxes(
         image = np.tile(image, (3, 1, 1))
     ndarr = image[:, :, ::-1].copy()
     img_to_draw = Image.fromarray(ndarr)
-    img_boxes = boxes.astype(np.int64).tolist()
-    width = int(max(np.abs(img_boxes[0][0] - img_boxes[0][2]) / 10, 1))
-
+    img_boxes = boxes.tolist()
+    width = 10
     if fill:
         draw = ImageDraw.Draw(img_to_draw, 'RGBA')
     else:
@@ -169,11 +164,13 @@ def draw_bounding_boxes(
 
     for bbox, color, label in zip(img_boxes, colors,
                                   labels):  # type: ignore[arg-type]
-        if fill:
-            fill_color = color + (100, )
-            draw.rectangle(bbox, width=width, outline=color, fill=fill_color)
+
+        fill_color = color + (
+            100, ) if fill else None  # Set fill color conditionally
+        if len(bbox) != 4:
+            draw.polygon(bbox, width=width, outline=color, fill=fill_color)
         else:
-            draw.rectangle(bbox, width=width, outline=color)
+            draw.rectangle(bbox, width=width, outline=color, fill=fill_color)
 
         if label is not None:
             margin = width + 1
@@ -207,3 +204,39 @@ def random_hex_color():
 
     # Combine the three values into a hex code.
     return '#' + red + green + blue
+
+
+def mask2rbox(mask):
+    y, x = np.nonzero(mask)
+    points = np.stack([x, y], axis=-1)
+    # (cx, cy), (w, h), a = cv2.minAreaRect(points)
+    rec = cv2.minAreaRect(points)
+    r_bbox = cv2.boxPoints(rec)
+    r_bbox = r_bbox.reshape(1, -1).squeeze()
+    return r_bbox
+
+
+def r_bbox2poly(bbox):
+    """Draw oriented bounding boxes on the axes.
+
+    Args:
+        ax (matplotlib.Axes): The input axes.
+        bboxes (ndarray): The input bounding boxes with the shape
+            of (n, 5).
+        color (list[tuple] | matplotlib.color): the colors for each
+            bounding boxes.
+        alpha (float): Transparency of bounding boxes. Default: 0.8.
+        thickness (int): Thickness of lines. Default: 2.
+
+    Returns:
+        matplotlib.Axes: The result axes.
+    """
+    xc, yc, w, h, ag = bbox
+    wx, wy = w / 2 * np.cos(ag), w / 2 * np.sin(ag)
+    hx, hy = h / 2 * np.sin(ag), h / 2 * np.cos(ag)
+    p1 = (xc - wx - hx, yc - wy - hy)
+    p2 = (xc + wx - hx, yc + wy - hy)
+    p3 = (xc + wx + hx, yc + wy + hy)
+    p4 = (xc - wx + hx, yc - wy + hy)
+    poly = [p1, p2, p3, p4]
+    return poly

@@ -47,13 +47,14 @@ def callback_custom_albumentations(trainer: BaseTrainer):
 
 
 def main():
-    model = YOLO('yolov5m6u.pt')
+    model = YOLO('yolov5x6u.pt')
     model.add_callback('on_pretrain_routine_end',
                        callback_custom_albumentations)
     model.train(
-        data='/data/home/rlchen/ProJect/phenocv/configs/yolo/tillering.yaml',
+        data='~/ProJect/phenocv/configs/yolo/panicle_drone.yaml',
         flipud=0.5,
         imgsz=1280,
+        device='0,1,2,3',
     )
 
 

@@ -4,14 +4,17 @@ from pathlib import Path
 from typing import Tuple, Union
 
 import numpy as np
+import torch
+from segment_anything import SamPredictor, sam_model_registry
 from sklearn.cluster import DBSCAN
+from torch import Tensor
 from ultralytics import YOLO
 from ultralytics.engine.results import Results
 
 from phenocv.utils import imshow
 from .utils import (compute_dist, cut_bbox, draw_bounding_boxes,
-                    generate_label, make_label_box_map, random_hex_color,
-                    save_img)
+                    generate_label, make_label_box_map, mask2rbox,
+                    random_hex_color, save_img)
 
 ODresult = namedtuple('ODresult',
                       ['path', 'image', 'label', 'bboxes', 'label2box'])
@@ -42,10 +45,11 @@ class YOLOInfer(metaclass=ABCMeta):
     def __init__(self,
                  model,
                  classes: int = 0,
-                 devices: Union[int, Tuple[int]] = 0) -> None:
-        self.model = YOLO(model).to(devices)
+                 device: Union[int, Tuple[int]] = 0) -> None:
+        self.model = YOLO(model).to(device)
         self.classes = classes
         self._results = []
+        self.device = device
 
     def __call__(self, source, conf=0.25, iou=0.7):
         """Perform inference on the given source.
@@ -148,15 +152,14 @@ class YOLOInfer(metaclass=ABCMeta):
         """
         pass
 
-    def _get_bbox(self, result: Results):
+    def _get_bbox(self, result: Results) -> tuple[Tensor, Tensor]:
         """Get the bounding boxes from the inference result.
 
         Args:
             result (Results): The inference result.
 
         Returns:
-            tuple: A tuple containing the normalized and unnormalized bounding
-                boxes.
+            tuple: contain xywhn and xyxy.
         """
         boxes = result.boxes
         index = boxes.cls == self.classes
@@ -375,3 +378,71 @@ class YOLOTillerDrone(YOLOStubbleDrone):
             ODresult: Performs the inference process on the given result.
     """
     pass
+
+
+class YOLOSAMOBB(YOLOInfer):
+
+    def __init__(
+            self,
+            model,
+            classes: int = 0,
+            device: int | Tuple[int] = 0,
+            sam_type: str = 'vit_h',
+            sam_weight: str = '~/ProJect/phenocv/weights/sam_vit_h_4b8939.pth',
+            max_batch_num_pred: int = 16) -> None:
+        super().__init__(model, classes, device)
+        self._init_sam(sam_type, sam_weight)
+        self.max_batch_num_pred = max_batch_num_pred
+
+    def _init_sam(self, sam_type: str, sam_weight: str):
+
+        build_sam = sam_model_registry[sam_type]
+        sam_model = SamPredictor(build_sam(checkpoint=sam_weight))
+        sam_model.model = sam_model.model.to(self.device)
+        self.sam = sam_model
+
+    def process(self, result: Results):
+
+        img = result.orig_img
+        _, xyxy = self._get_bbox(result)
+
+        self.sam.set_image(img, image_format='BGR')
+
+        masks = []
+        num_pred = xyxy.shape[0]
+        N = self.max_batch_num_pred
+
+        num_batches = int(np.ceil(num_pred / N))
+
+        for i in range(num_batches):
+            left_index = i * N
+            right_index = (i + 1) * N
+            if i == num_batches - 1:
+                batch_boxes = xyxy[left_index:]
+            else:
+                batch_boxes = xyxy[left_index:right_index]
+
+            transformed_boxes = self.sam.transform.apply_boxes(
+                batch_boxes, img.shape[:2])
+            transformed_boxes = torch.from_numpy(transformed_boxes).to(
+                self.device)
+            batch_masks = self.sam.predict_torch(
+                point_coords=None,
+                point_labels=None,
+                boxes=transformed_boxes,
+                multimask_output=False)[0]
+            batch_masks = batch_masks.squeeze(1).cpu()
+            masks.extend([*batch_masks])
+        masks = torch.stack(masks, dim=0)
+        r_bboxes = [mask2rbox(mask.numpy()) for mask in masks]
+        r_bboxes = np.stack(r_bboxes, axis=0)
+
+        label = [i for i in range(1, r_bboxes.shape[0] + 1)]
+        label2box = make_label_box_map(label=label, boxes=r_bboxes)
+
+        return ODresult(
+            image=img,
+            path=result.path,
+            bboxes=r_bboxes,
+            label=None,
+            label2box=label2box)
