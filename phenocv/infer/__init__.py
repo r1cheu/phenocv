@@ -1,5 +1,7 @@
-from .yolo import YOLOSAMOBB, YOLOStubbleDrone, YOLOStubbleUAV, YOLOTillerDrone
+from .yolo import (YoloPanicleUav, YoloSamObb, YoloStubbleDrone,
+                   YoloStubbleUav, YoloTillerDrone)
 
 __all__ = [
-    'YOLOStubbleUAV', 'YOLOStubbleDrone', 'YOLOTillerDrone', 'YOLOSAMOBB'
+    'YoloStubbleUav', 'YoloStubbleDrone', 'YoloTillerDrone', 'YoloSamObb',
+    'YoloPanicleUav'
 ]

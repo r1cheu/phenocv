@@ -1,12 +1,15 @@
 import os
 import random
 import warnings
-from typing import List, Optional, Tuple, Union
+from typing import List, Optional, Sequence, Tuple, Union
 
 import cv2
 import numpy as np
+import torch
 from PIL import Image, ImageDraw, ImageFont
+from torchvision.ops import nms
 from torchvision.utils import _parse_colors
+from ultralytics.engine.results import Boxes, Results
 
 
 def generate_label(row: int, col: int):
@@ -47,12 +50,11 @@ def compute_dist(x, x_prime):
 
 
 def make_label_box_map(label, boxes):
-    """
-    Create a dictionary mapping labels to boxes.
+    """Create a dictionary mapping labels to boxes.
 
     Args:
-        label (list): List of labels.
-        boxes (list): List of boxes.
+        label (np.ndarray): List of labels.
+        boxes (Tensor): List of boxes.
 
     Returns:
         dict: Dictionary mapping labels to boxes.
@@ -97,14 +99,14 @@ def save_img(path, img):
 
 
 def draw_bounding_boxes(
-        image: np.ndarray,
-        boxes: np.ndarray,
-        labels: Optional[List[str]] = None,
-        font: Optional[str] = None,
-        colors: Optional[Union[List[Union[str, Tuple[int, int, int]]], str,
-        Tuple[int, int, int]]] = None,
-        fill: Optional[bool] = False,
-        font_size: Optional[int] = None,
+    image: np.ndarray,
+    boxes: np.ndarray,
+    labels: Optional[List[str]] = None,
+    font: Optional[str] = None,
+    colors: Optional[Union[List[Union[str, Tuple[int, int, int]]], str,
+                           Tuple[int, int, int]]] = None,
+    fill: Optional[bool] = False,
+    font_size: Optional[int] = None,
 ) -> np.ndarray:
     """Draw bounding boxes on an image.
 
@@ -144,8 +146,8 @@ def draw_bounding_boxes(
 
     if labels is None:
         labels: Union[List[str],
-        List[None]] = [None
-                       ] * num_boxes  # type: ignore[no-redef]
+                      List[None]] = [None
+                                     ] * num_boxes  # type: ignore[no-redef]
     elif len(labels) != num_boxes:
         raise ValueError(
             f'Number of boxes ({num_boxes}) and labels ({len(labels)})'
@@ -174,7 +176,7 @@ def draw_bounding_boxes(
                                   labels):  # type: ignore[arg-type]
 
         fill_color = color + (
-            100,) if fill else None  # Set fill color conditionally
+            100, ) if fill else None  # Set fill color conditionally
         if len(bbox) != 4:
             draw.polygon(bbox, width=width, outline=color, fill=fill_color)
         else:
@@ -215,8 +217,7 @@ def random_hex_color():
 
 
 def mask2rbox(mask):
-    """
-    Convert a binary mask to a rotated bounding box.
+    """Convert a binary mask to a rotated bounding box.
 
     Parameters:
     mask (ndarray): Binary mask representing the object.
@@ -256,3 +257,74 @@ def r_bbox2poly(bbox):
     p4 = (xc - wx + hx, yc - wy + hy)
     poly = [p1, p2, p3, p4]
     return poly
+
+
+def shift_predictions(results: List[Results], offsets: Sequence[Tuple[int,
+                                                                      int]],
+                      src_image_shape) -> Boxes:
+    """Shifts the predicted bounding boxes based on the given offsets.
+
+    Args:
+        results (List[Results]): List of Results objects containing predicted
+        bounding boxes.
+        offsets (Sequence[Tuple[int, int]]): Sequence of (x, y) offsets to
+        shift the bounding boxes.
+        src_image_shape: Shape of the source image.
+
+    Returns:
+        Boxes: Shifted bounding boxes.
+
+    Raises:
+        ImportError: If the 'sahi' module is not installed.
+    """
+    try:
+        from sahi.slicing import shift_bboxes
+    except ImportError:
+        raise ImportError('Please run "pip install -U sahi" '
+                          'to install sahi first for large image inference.')
+
+    assert len(results) == len(
+        offsets), 'The `results` should has the ' 'same length with `offsets`.'
+
+    shifted_predictions = []
+    for result, offset in zip(results, offsets):
+
+        pred_inst = result.boxes
+        if pred_inst.xyxy.numel() == 0:
+            shifted_bboxes = torch.empty((0, 6), device=pred_inst.xyxy.device)
+            shifted_predictions.append(shifted_bboxes)
+            continue
+
+        shifted_bboxes = shift_bboxes(pred_inst.xyxy, offset)
+        shifted_bboxes = torch.cat([shifted_bboxes, pred_inst.data[:, -2:]],
+                                   dim=1)
+
+        shifted_predictions.append(shifted_bboxes)
+    shifted_predictions = torch.cat(shifted_predictions, dim=0)
+    shifted_predictions = Boxes(shifted_predictions, src_image_shape)
+
+    return shifted_predictions
+
+
+def merge_results_by_nms(results: List[Results], offsets: Sequence[Tuple[int,
+                                                                         int]],
+                         src_image_shape, iou_thres) -> Boxes:
+    """Merge the results of object detection by applying non-maximum
+    suppression (NMS).
+
+    Args:
+        results (List[Results]): List of Results objects containing the
+        predicted bounding boxes and confidence scores.
+        offsets (Sequence[Tuple[int, int]]): Sequence of offset tuples for
+        each result.
+        src_image_shape: Shape of the source image.
+        iou_thres: IoU (Intersection over Union) threshold for NMS.
+
+    Returns:
+        Boxes: Merged bounding boxes after applying NMS.
+    """
+    shifted_instances = shift_predictions(results, offsets, src_image_shape)
+
+    keep = nms(shifted_instances.xyxy, shifted_instances.conf, iou_thres)
+    bboxes = shifted_instances.data[keep].clone()
+    return bboxes

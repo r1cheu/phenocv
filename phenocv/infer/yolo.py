@@ -1,171 +1,20 @@
-from abc import ABCMeta, abstractmethod
 from collections import namedtuple
-from pathlib import Path
-from typing import Tuple, Union
+from typing import Tuple
 
 import numpy as np
 import torch
 from segment_anything import SamPredictor, sam_model_registry
 from sklearn.cluster import DBSCAN
-from torch import Tensor
-from ultralytics import YOLO
 from ultralytics.engine.results import Results
 
-from phenocv.utils import imshow
-from .utils import (compute_dist, cut_bbox, draw_bounding_boxes,
-                    generate_label, make_label_box_map, mask2rbox,
-                    random_hex_color, save_img)
+from .base_yolo import YoloInfer, YoloSahiInfer
+from .utils import compute_dist, generate_label, make_label_box_map, mask2rbox
 
 ODresult = namedtuple('ODresult',
                       ['path', 'image', 'label', 'bboxes', 'label2box'])
 
 
-class YOLOInfer(metaclass=ABCMeta):
-    """YOLOInfer is an abstract base class for performing inference using YOLO
-    models.
-
-    Args:
-        model: The YOLO model to use for inference.
-        classes (int): The number of classes in the model.
-        device (int or Tuple[int]): The device(s) to use for inference.
-
-    Attributes:
-        model: The YOLO model used for inference.
-        classes (int): The number of classes in the model.
-        _results (list): A list to store the processed inference results.
-
-    Methods:
-        __call__: Perform inference on the given source.
-        results: Get the inference results.
-        _clear: Clear the inference results.
-        process: Abstract method to process the inference result.
-        _get_bbox: Get the bounding boxes from the inference result.
-    """
-
-    def __init__(self,
-                 model,
-                 classes: int = 0,
-                 device: Union[int, Tuple[int]] = 0) -> None:
-        self.model = YOLO(model).to(device)
-        self.classes = classes
-        self._results = []
-        self.device = device
-
-    def __call__(self, source, conf=0.25, iou=0.7):
-        """Perform inference on the given source.
-
-        Args:
-            source: The source for inference.
-            conf (float): The confidence threshold for object detection.
-            iou (float): The IoU threshold for non-maximum suppression.
-        """
-        self._clear()
-        results = self.model.predict(source, conf=conf, iou=iou, verbose=False)
-
-        for _result in results:
-            _result = _result.cpu().numpy()
-            result = self.process(_result)
-            self._results.append(result)
-
-    def plot(self, show=False, save_dir=None, box_color=None):
-        """Plots the bounding boxes on the images and optionally saves them.
-
-        Args:
-            box_color (str): color in hex or rgb format.
-            show (bool): Whether to show the images with bounding boxes.
-            save_dir (str): The directory to save the images. If None, the
-                images are not saved.
-
-        Returns:
-            List[np.ndarray]: The images with bounding boxes.
-        """
-        if save_dir is not None:
-            save_dir = Path(save_dir)
-            save_dir.mkdir()
-
-        if box_color is None:
-            box_color = random_hex_color()
-
-        for result in self._results:
-            img = result.image
-            bboxes = result.bboxes
-            label = result.label
-
-            img = draw_bounding_boxes(
-                img, bboxes, labels=label, colors=box_color, font_size=70)
-
-            if save_dir is not None:
-                img_path = Path(result.path)
-                img_name = img_path.name
-                save_img(str(save_dir / img_name), img)
-
-            if show:
-                imshow(img[:, :, ::-1])
-
-    def save_cut(self, save_dir, show=False, expand_scale=0.05):
-        """Saves the cropped images of the detected stubble.
-
-        Args:
-            show: whether to show the cutting results using matplotlib.
-            save_dir (str): The directory to save the cropped images.
-            expand_scale (float): The scale factor to expand the bounding
-                boxes.
-        """
-
-        save_dir = Path(save_dir)
-        save_dir.mkdir(exist_ok=True)
-
-        for result in self._results:
-
-            img = result.image
-            bboxes = result.label2box
-
-            for label, bbox in bboxes.items():
-                bbox = cut_bbox(img, bbox, expand_scale)
-                if show:
-                    imshow(bbox[:, :, ::-1])
-                img_path = Path(result.path)
-                img_name = img_path.stem + f'_{label}' + img_path.suffix
-                save_img(str(save_dir / img_name), bbox)
-
-    @property
-    def results(self):
-        """Get the inference results.
-
-        Returns:
-            list: The list of inference results.
-        """
-        return self._results
-
-    def _clear(self):
-        """Clear the inference results."""
-        self._results = []
-
-    @abstractmethod
-    def process(self, result):
-        """Abstract method to process the inference result.
-
-        Args:
-            result: The inference result to process.
-        """
-        pass
-
-    def _get_bbox(self, result: Results) -> tuple[Tensor, Tensor]:
-        """Get the bounding boxes from the inference result.
-
-        Args:
-            result (Results): The inference result.
-
-        Returns:
-            tuple: contain xywhn and xyxy.
-        """
-        boxes = result.boxes
-        index = boxes.cls == self.classes
-
-        return boxes.xywhn[index], boxes.xyxy[index]
-
-
-class YOLOStubbleUAV(YOLOInfer):
+class YoloStubbleUav(YoloInfer):
     """YOLOStubbleUAV is a class that performs inference using YOLO model for
     detecting stubble in UAV images.
 
@@ -341,7 +190,7 @@ class YOLOStubbleUAV(YOLOInfer):
         return True
 
 
-class YOLOStubbleDrone(YOLOInfer):
+class YoloStubbleDrone(YoloInfer):
     """YOLOStubbleDrone is a class that performs inference using YOLO model for
     detecting stubble from image taken by drones.
 
@@ -365,7 +214,7 @@ class YOLOStubbleDrone(YOLOInfer):
             label2box=label2box)
 
 
-class YOLOTillerDrone(YOLOStubbleDrone):
+class YoloTillerDrone(YoloStubbleDrone):
     """YOLOTillerDrone is a class that performs inference using YOLO model for
     detecting tiller from image taken by drones.
 
@@ -376,9 +225,9 @@ class YOLOTillerDrone(YOLOStubbleDrone):
     pass
 
 
-class YOLOSAMOBB(YOLOInfer):
+class YoloSamObb(YoloInfer):
     """
-    YOLOSAMOBB is a class that convert horizontal bounding box to orientational 
+    YOLOSAMOBB is a class that convert horizontal bounding box to orientational
     bounding box using YOLO model with SAM.
     Args:
         model: The YOLO model.
@@ -411,13 +260,11 @@ class YOLOSAMOBB(YOLOInfer):
         self.max_batch_num_pred = max_batch_num_pred
 
     def _init_sam(self, sam_type: str, sam_weight: str):
-        """
-        Initializes the SAM model.
+        """Initializes the SAM model.
 
         Args:
             sam_type (str): The type of SAM model to use.
             sam_weight (str): The path to the SAM model weights.
-
         """
         build_sam = sam_model_registry[sam_type]
         sam_model = SamPredictor(build_sam(checkpoint=sam_weight))
@@ -425,15 +272,13 @@ class YOLOSAMOBB(YOLOInfer):
         self.sam = sam_model
 
     def process(self, result: Results):
-        """
-        Processes the results of object detection.
+        """Processes the results of object detection.
 
         Args:
             result (Results): The results of object detection.
 
         Returns:
             ODresult: The processed object detection results.
-
         """
         img = result.orig_img
         _, xyxy = self._get_bbox(result)
@@ -444,7 +289,8 @@ class YOLOSAMOBB(YOLOInfer):
         num_pred = xyxy.shape[0]
         N = self.max_batch_num_pred
 
-        num_batches = int(np.ceil(num_pred / N)) # batch the boxes to avoid OOM
+        num_batches = int(np.ceil(num_pred /
+                                  N))  # batch the boxes to avoid OOM
 
         for i in range(num_batches):
             left_index = i * N
@@ -476,5 +322,22 @@ class YOLOSAMOBB(YOLOInfer):
             image=img,
             path=result.path,
             bboxes=r_bboxes,
+            label=None,
+            label2box=label2box)
+
+
+class YoloPanicleUav(YoloSahiInfer):
+
+    def process(self, result):
+        img = result.orig_img
+        _, bboxes = self._get_bbox(result)
+
+        label = np.arange(1, bboxes.shape[0] + 1)
+        label2box = make_label_box_map(label, bboxes)
+
+        return ODresult(
+            image=img,
+            path=result.path,
+            bboxes=bboxes,
             label=None,
             label2box=label2box)

@@ -2,7 +2,6 @@ import re
 from abc import ABCMeta, abstractmethod
 from pathlib import Path
 from typing import Union
-from matplotlib import pyplot as plt
 
 import numpy as np
 import pandas as pd
@@ -223,12 +222,7 @@ class HeadingDateExtractor(TraitExtractor):
         self._result[
             f'{hstart}-{hend}'] = self._result[hend] - self._result[hstart]
 
-    def plot(self,):
-        date = self._data['date'].to_numpy().astype('datetime64[D]')
-        values = self._data['values'].to_numpy()
 
-        fig, ax = plt.subplots(figsize=(8, 4))
-        
 class YOLOTillerExtractor(TraitExtractor):
 
     def __init__(self, data_dir: Path):
