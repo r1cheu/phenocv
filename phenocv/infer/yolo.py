@@ -458,7 +458,6 @@ class YOLOSAMOBB(YOLOInfer):
                 batch_boxes, img.shape[:2])
             transformed_boxes = torch.from_numpy(transformed_boxes).to(
                 self.device)
-
             batch_masks = self.sam.predict_torch(
                 point_coords=None,
                 point_labels=None,
@@ -466,7 +465,6 @@ class YOLOSAMOBB(YOLOInfer):
                 multimask_output=False)[0]
             batch_masks = batch_masks.squeeze(1).cpu()
             masks.extend([*batch_masks])
-
         masks = torch.stack(masks, dim=0)
         r_bboxes = [mask2rbox(mask.numpy()) for mask in masks]
         r_bboxes = np.stack(r_bboxes, axis=0)

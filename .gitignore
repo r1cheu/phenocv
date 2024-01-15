@@ -1,6 +1,9 @@
 # Byte-compiled / optimized / DLL files
 __pycache__/
+<<<<<<< HEAD
 *.pyc
+=======
+>>>>>>> 7778ef06aa6244b4783330f2f9cf2c567a3326f0
 
 *.egg-info/
 *.egg
@@ -26,7 +29,10 @@ yolo_workdirs/
 tests/
 label_studio/
 weights/
+<<<<<<< HEAD
 
+=======
+>>>>>>> 7778ef06aa6244b4783330f2f9cf2c567a3326f0
 # Pytorch
 *.pth
 *.py~
