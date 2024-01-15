@@ -2,10 +2,7 @@ import re
 from abc import ABCMeta, abstractmethod
 from pathlib import Path
 from typing import Union
-<<<<<<< HEAD
 from matplotlib import pyplot as plt
-=======
->>>>>>> 7778ef06aa6244b4783330f2f9cf2c567a3326f0
 
 import numpy as np
 import pandas as pd
@@ -33,10 +30,7 @@ class TraitExtractor(metaclass=ABCMeta):
     def __init__(self, data_path: Path):
 
         self._data = self._read_data(data_path)
-<<<<<<< HEAD
         self._filtering = False
-=======
->>>>>>> 7778ef06aa6244b4783330f2f9cf2c567a3326f0
         self._result = {}
 
     @abstractmethod
@@ -229,16 +223,12 @@ class HeadingDateExtractor(TraitExtractor):
         self._result[
             f'{hstart}-{hend}'] = self._result[hend] - self._result[hstart]
 
-<<<<<<< HEAD
     def plot(self,):
         date = self._data['date'].to_numpy().astype('datetime64[D]')
         values = self._data['values'].to_numpy()
 
         fig, ax = plt.subplots(figsize=(8, 4))
         
-=======
-
->>>>>>> 7778ef06aa6244b4783330f2f9cf2c567a3326f0
 class YOLOTillerExtractor(TraitExtractor):
 
     def __init__(self, data_dir: Path):
