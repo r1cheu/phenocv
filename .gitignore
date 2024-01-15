@@ -1,0 +1,41 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.pyc
+
+*.egg-info/
+*.egg
+rawdata
+
+# Jupyter Notebook
+.ipynb_checkpoints
+*.ipynb
+notebook/
+
+data/
+data
+.vscode
+.idea
+
+# custom
+*.pkl
+*.pkl.json
+*.log.json
+work_dirs/
+raw_data/
+yolo_workdirs/
+tests/
+label_studio/
+weights/
+
+# Pytorch
+*.pth
+*.py~
+*.sh~
+*.pt
+phenocv.code-workspace
+.fleet/
+
+# label studio
+/label_anything/sam/[0-9]*/
+datasets
+runs/
