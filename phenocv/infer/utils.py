@@ -107,6 +107,7 @@ def draw_bounding_boxes(
                            Tuple[int, int, int]]] = None,
     fill: Optional[bool] = False,
     font_size: Optional[int] = None,
+    line_width: Optional[int] = None,
 ) -> np.ndarray:
     """Draw bounding boxes on an image.
 
@@ -122,8 +123,6 @@ def draw_bounding_boxes(
             A list containing the colors of boxes. Defaults to None.
         fill (bool, optional): Whether to fill the boxes with colors.
             Defaults to False.
-        width (int, optional): The line width of boxes. Defaults to 1.
-        font_size (int, optional): The font size of labels. Defaults to None.
 
     Returns:
         np.ndarray[H, W, C]: The image with drawn bounding boxes.
@@ -158,15 +157,17 @@ def draw_bounding_boxes(
     if font is None:
         font = os.path.join(cv2.__path__[0], 'qt', 'fonts', 'DejaVuSans.ttf')
 
-    txt_font = ImageFont.truetype(font, size=font_size)
-
-    # Handle Grayscale images
     if image.shape[-1] == 1:
         image = np.tile(image, (3, 1, 1))
     ndarr = image[:, :, ::-1].copy()
     img_to_draw = Image.fromarray(ndarr)
     img_boxes = boxes.tolist()
-    width = 10
+
+    width = int(ndarr.shape[0] // 500) if line_width is None else line_width
+    font_size = int(ndarr.shape[0] // 50) if font_size is None else font_size
+
+    txt_font = ImageFont.truetype(font, size=font_size)
+
     if fill:
         draw = ImageDraw.Draw(img_to_draw, 'RGBA')
     else:
@@ -183,37 +184,33 @@ def draw_bounding_boxes(
             draw.rectangle(bbox, width=width, outline=color, fill=fill_color)
 
         if label is not None:
-            margin = width + 1
-            draw.text((bbox[0] + margin, bbox[1] + margin),
+            w, h = txt_font.getsize(label)  # text width, height
+            outside = bbox[1] - h >= 0  # label fits outside box
+            draw.rectangle(
+                (bbox[0], bbox[1] - h if outside else bbox[1], bbox[0] + w + 1,
+                 bbox[1] + 1 if outside else bbox[1] + h + 1),
+                fill=color,
+            )
+            font_color = decide_font_color(*color)
+            draw.text((bbox[0], bbox[1] - h if outside else bbox[1]),
                       label,
-                      fill=color,
+                      fill=font_color,
                       font=txt_font)
 
     return np.array(img_to_draw)[:, :, ::-1]
 
 
-def random_hex_color():
-    """Generates a random hex color code.
+def random_rgb_color():
+    """Generates a random rgb color code.
 
     Returns:
-    A string representing a random hex color code.
+    A string representing a random rgb color code.
     """
+    red = random.randint(0, 255)
+    green = random.randint(0, 255)
+    blue = random.randint(0, 255)
 
-    # Generate three random integers for red, green, and blue values.
-    red = hex(random.randint(0, 255))[2:]
-    green = hex(random.randint(0, 255))[2:]
-    blue = hex(random.randint(0, 255))[2:]
-
-    # Ensure each value has two characters (prepend a "0" if necessary).
-    if len(red) == 1:
-        red = '0' + red
-    if len(green) == 1:
-        green = '0' + green
-    if len(blue) == 1:
-        blue = '0' + blue
-
-    # Combine the three values into a hex code.
-    return '#' + red + green + blue
+    return (red, green, blue)
 
 
 def mask2rbox(mask):
@@ -328,3 +325,13 @@ def merge_results_by_nms(results: List[Results], offsets: Sequence[Tuple[int,
     keep = nms(shifted_instances.xyxy, shifted_instances.conf, iou_thres)
     bboxes = shifted_instances.data[keep].clone()
     return bboxes
+
+
+def decide_font_color(r, g, b):
+    # 计算对比度
+    contrast = ((r * 299) + (g * 587) + (b * 114)) / 1000 / 255
+    # 根据对比度决定字体颜色
+    if contrast > 0.5:
+        return 0, 0, 0
+    else:
+        return 255, 255, 255

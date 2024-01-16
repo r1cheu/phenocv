@@ -1,3 +1,4 @@
+import warnings
 from abc import ABCMeta, abstractmethod
 from collections import namedtuple
 from pathlib import Path
@@ -15,7 +16,7 @@ from ultralytics.engine.results import Results
 
 from phenocv.utils import imshow
 from .utils import (cut_bbox, draw_bounding_boxes, merge_results_by_nms,
-                    random_hex_color, save_img)
+                    random_rgb_color, save_img)
 
 ODresult = namedtuple('ODresult',
                       ['path', 'image', 'label', 'bboxes', 'label2box'])
@@ -85,7 +86,7 @@ class YoloInfer(metaclass=ABCMeta):
             save_dir.mkdir()
 
         if box_color is None:
-            box_color = random_hex_color()
+            box_color = random_rgb_color()
 
         for result in self._results:
             img = result.image
@@ -93,7 +94,7 @@ class YoloInfer(metaclass=ABCMeta):
             label = result.label
 
             img = draw_bounding_boxes(
-                img, bboxes, labels=label, colors=box_color, font_size=70)
+                img, bboxes, labels=label, colors=box_color)
 
             if save_dir is not None:
                 img_path = Path(result.path)
@@ -103,7 +104,7 @@ class YoloInfer(metaclass=ABCMeta):
             if show:
                 imshow(img[:, :, ::-1])
 
-    def save_cut(self, save_dir, show=False, expand_scale=0.05):
+    def save_cut(self, save_dir, show=False, labels=None, expand_scale=0.05):
         """Saves the cropped images of the detected stubble.
 
         Args:
@@ -111,23 +112,45 @@ class YoloInfer(metaclass=ABCMeta):
             save_dir (str): The directory to save the cropped images.
             expand_scale (float): The scale factor to expand the bounding
                 boxes.
+            labels (List[str]): The labels to choose specific bbox to cut. If
+                None, all the bboxes will be cut.
         """
 
         save_dir = Path(save_dir)
         save_dir.mkdir(exist_ok=True)
 
-        for result in self._results:
+        if self._results[0].label2box is None and labels is not None:
+            warnings.warn(
+                'The inference results do not contain label2box. '
+                'The labels will be ignored. And Cut all the bboxes.')
+            labels = None
 
-            img = result.image
-            bboxes = result.label2box
+        if labels is None:
+            for result in self._results:
+                img = result.image
+                bboxes = result.bboxes
 
-            for label, bbox in bboxes.items():
-                bbox = cut_bbox(img, bbox, expand_scale)
-                if show:
-                    imshow(bbox[:, :, ::-1])
-                img_path = Path(result.path)
-                img_name = img_path.stem + f'_{label}' + img_path.suffix
-                save_img(str(save_dir / img_name), bbox)
+                for idx, bbox in enumerate(bboxes):
+                    bbox = cut_bbox(img, bbox, expand_scale)
+                    if show:
+                        imshow(bbox[:, :, ::-1])
+                    img_path = Path(result.path)
+                    img_name = (
+                        img_path.stem + f'_{int(idx):02d}' + img_path.suffix)
+                    save_img(str(save_dir / img_name), bbox)
+        else:
+            for result in self._results:
+                img = result.image
+                label2box = result.label2box
+
+                for label in labels:
+                    bbox = label2box[label]
+                    bbox = cut_bbox(img, bbox, expand_scale)
+                    if show:
+                        imshow(bbox[:, :, ::-1])
+                    img_path = Path(result.path)
+                    img_name = (img_path.stem + f'_{label}' + img_path.suffix)
+                    save_img(str(save_dir / img_name), bbox)
 
     @property
     def results(self):
@@ -164,6 +187,20 @@ class YoloInfer(metaclass=ABCMeta):
         index = boxes.cls == self.classes
 
         return boxes.xywhn[index], boxes.xyxy[index]
+
+    def _get_raw_bbox(self, result: Results) -> Tensor:
+        """Get the bounding boxes from the inference result.
+
+        Args:
+            result (Results): The inference result.
+
+        Returns:
+            tuple: contain xywhn and xyxy.
+        """
+        boxes = result.boxes
+        index = boxes.cls == self.classes
+
+        return boxes.data[index]
 
 
 class _YoloSahiInfer(YoloInfer, metaclass=ABCMeta):
@@ -276,6 +313,7 @@ class YoloSahiInfer(YoloInfer, metaclass=ABCMeta):
                  classes: int = 0,
                  conf: float = 0.3,
                  device: Union[int, Tuple[int]] = 0):
+
         self.model = AutoDetectionModel.from_pretrained(
             model_type='yolov8',
             model_path=model,

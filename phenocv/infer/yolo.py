@@ -201,17 +201,17 @@ class YoloStubbleDrone(YoloInfer):
 
     def process(self, result: Results):
         img = result.orig_img
-        _, bboxes = self._get_bbox(result)
-
-        label = [i for i in range(1, bboxes.shape[0] + 1)]
-        label2box = make_label_box_map(label=label, boxes=bboxes)
+        raw_bbox = self._get_raw_bbox(result)
+        bboxes = raw_bbox[:, :4]
+        names = self.model.names
+        label = [f'{names[cls]} {conf:.2f}' for conf, cls in raw_bbox[:, 4:]]
 
         return ODresult(
             image=img,
             path=result.path,
             bboxes=bboxes,
-            label=None,
-            label2box=label2box)
+            label=label,
+            label2box=None)
 
 
 class YoloTillerDrone(YoloStubbleDrone):
@@ -315,29 +315,26 @@ class YoloSamObb(YoloInfer):
         r_bboxes = [mask2rbox(mask.numpy()) for mask in masks]
         r_bboxes = np.stack(r_bboxes, axis=0)
 
-        label = [i for i in range(1, r_bboxes.shape[0] + 1)]
-        label2box = make_label_box_map(label=label, boxes=r_bboxes)
-
         return ODresult(
             image=img,
             path=result.path,
             bboxes=r_bboxes,
             label=None,
-            label2box=label2box)
+            label2box=None)
 
 
 class YoloPanicleUav(YoloSahiInfer):
 
-    def process(self, result):
+    def process(self, result: Results):
         img = result.orig_img
-        _, bboxes = self._get_bbox(result)
-
-        label = np.arange(1, bboxes.shape[0] + 1)
-        label2box = make_label_box_map(label, bboxes)
+        raw_bbox = self._get_raw_bbox(result)
+        bboxes = raw_bbox[:, :4]
+        names = self.model.model.names
+        label = [f'{names[cls]} {conf:.2f}' for conf, cls in raw_bbox[:, 4:]]
 
         return ODresult(
             image=img,
             path=result.path,
             bboxes=bboxes,
-            label=None,
-            label2box=label2box)
+            label=label,
+            label2box=None)

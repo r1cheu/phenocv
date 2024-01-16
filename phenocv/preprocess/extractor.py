@@ -6,7 +6,7 @@ from typing import Optional, Union
 
 import cv2
 import numpy as np
-import PIL
+from PIL import Image
 
 from phenocv.utils import check_path
 from .utils import binarize_cive, min_sum, moving_average, resize
@@ -59,12 +59,12 @@ class ImageExtractor(metaclass=ABCMeta):
         cv2.imwrite(str(img_path), self._processed_image)
 
     @property
-    def image(self):
+    def image_pil(self):
         image = cv2.cvtColor(self.ori_image, cv2.COLOR_BGR2RGB)
-        return PIL.Image.fromarray(image)
+        return Image.fromarray(image)
 
     @property
-    def processed_image(self):
+    def processed_image_pil(self):
 
         if not self._processed:
             self.process()
@@ -72,7 +72,19 @@ class ImageExtractor(metaclass=ABCMeta):
         processed_image = cv2.cvtColor(self._processed_image,
                                        cv2.COLOR_BGR2RGB)
 
-        return PIL.Image.fromarray(processed_image)
+        return Image.fromarray(processed_image)
+
+    @property
+    def image_array(self) -> np.ndarray:
+        return cv2.cvtColor(self.ori_image, cv2.COLOR_BGR2RGB)
+
+    @property
+    def processed_image_array(self) -> np.ndarray:
+
+        if not self._processed:
+            self.process()
+
+        return cv2.cvtColor(self._processed_image, cv2.COLOR_BGR2RGB)
 
 
 class H20ImageExtractor(ImageExtractor):
