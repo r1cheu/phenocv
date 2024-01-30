@@ -28,20 +28,20 @@ class Sam(nn.Module):
         pixel_mean: List[float] = [123.675, 116.28, 103.53],
         pixel_std: List[float] = [58.395, 57.12, 57.375],
     ) -> None:
-        """SAM predicts object masks from an image and input prompts.
+        """SAM predicts object masks from an image and path prompts.
 
         Arguments:
           image_encoder (ImageEncoderViT): The backbone used to encode the
             image into image embeddings that allow for efficient mask
             prediction.
-          prompt_encoder (PromptEncoder): Encodes various types of input
+          prompt_encoder (PromptEncoder): Encodes various types of path
             prompts.
           mask_decoder (MaskDecoder): Predicts masks from the image embeddings
             and encoded prompts.
           pixel_mean (list(float)): Mean values for normalizing pixels in the
-            input image.
+            path image.
           pixel_std (list(float)): Std values for normalizing pixels in the
-            input image.
+            path image.
         """
         super().__init__()
         self.image_encoder = image_encoder
@@ -67,36 +67,36 @@ class Sam(nn.Module):
         over calling the model directly.
 
         Arguments:
-          batched_input (list(dict)): A list over input images, each a
+          batched_input (list(dict)): A list over path images, each a
             dictionary with the following keys. A prompt key can be
             excluded if it is not present.
               'image': The image as a torch tensor in 3xHxW format,
-                already transformed for input to the model.
+                already transformed for path to the model.
               'original_size': (tuple(int, int)) The original size of
                 the image before transformation, as (H, W).
               'point_coords': (torch.Tensor) Batched point prompts for
                 this image, with shape BxNx2. Already transformed to the
-                input frame of the model.
+                path frame of the model.
               'point_labels': (torch.Tensor) Batched labels for point prompts,
                 with shape BxN.
               'boxes': (torch.Tensor) Batched box inputs, with shape Bx4.
-                Already transformed to the input frame of the model.
+                Already transformed to the path frame of the model.
               'mask_inputs': (torch.Tensor) Batched mask inputs to the model,
                 in the form Bx1xHxW.
           multimask_output (bool): Whether the model should predict multiple
             disambiguating masks, or return a single mask.
 
         Returns:
-          (list(dict)): A list over input images, where each element is
+          (list(dict)): A list over path images, where each element is
             as dictionary with the following keys.
               'masks': (torch.Tensor) Batched binary mask predictions,
-                with shape BxCxHxW, where B is the number of input prompts,
+                with shape BxCxHxW, where B is the number of path prompts,
                 C is determined by multimask_output, and (H, W) is the
                 original size of the image.
               'iou_predictions': (torch.Tensor) The model's predictions
                 of mask quality, in shape BxC.
               'low_res_logits': (torch.Tensor) Low resolution logits with
-                shape BxCxHxW, where H=W=256. Can be passed as mask input
+                shape BxCxHxW, where H=W=256. Can be passed as mask path
                 to subsequent iterations of prediction.
         """
         input_images = torch.stack(
@@ -147,10 +147,10 @@ class Sam(nn.Module):
         Arguments:
           masks (torch.Tensor): Batched masks from the mask_decoder,
             in BxCxHxW format.
-          input_size (tuple(int, int)): The size of the image input to the
+          input_size (tuple(int, int)): The size of the image path to the
             model, in (H, W) format. Used to remove padding.
           original_size (tuple(int, int)): The original size of the image
-            before resizing for input to the model, in (H, W) format.
+            before resizing for path to the model, in (H, W) format.
 
         Returns:
           (torch.Tensor): Batched masks in BxCxHxW format, where (H, W)
@@ -168,7 +168,7 @@ class Sam(nn.Module):
         return masks
 
     def preprocess(self, x: torch.Tensor) -> torch.Tensor:
-        """Normalize pixel values and pad to a square input."""
+        """Normalize pixel values and pad to a square path."""
         # Normalize colors
         x = (x - self.pixel_mean) / self.pixel_std
 

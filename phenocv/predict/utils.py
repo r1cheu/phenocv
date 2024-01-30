@@ -71,7 +71,7 @@ def cut_bbox(img, bbox, scale=0):
     """Cuts out a bounding box region from an image.
 
     Parameters:
-    img (numpy.ndarray): The input image.
+    img (numpy.ndarray): The path image.
     bbox (tuple): The bounding box coordinates in the format (x0, y0, x1, y1).
     scale (float): The scale factor to expand the bounding box (default: 0).
 
@@ -234,8 +234,8 @@ def r_bbox2poly(bbox):
     """Draw oriented bounding boxes on the axes.
 
     Args:
-        ax (matplotlib.Axes): The input axes.
-        bboxes (ndarray): The input bounding boxes with the shape
+        ax (matplotlib.Axes): The path axes.
+        bboxes (ndarray): The path bounding boxes with the shape
             of (n, 5).
         color (list[tuple] | matplotlib.color): the colors for each
             bounding boxes.

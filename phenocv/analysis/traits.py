@@ -1,266 +1,125 @@
-import re
-from abc import ABCMeta, abstractmethod
 from pathlib import Path
-from typing import Union
+from typing import Union, Optional
+from abc import ABCMeta
+from pprint import pprint
 
-import numpy as np
-import pandas as pd
-
-
-class TraitExtractor(metaclass=ABCMeta):
-    """Abstract base class for trait extraction.
-
-    Args:
-        data_path (Path): The path to the trait data file.
-            The file should be tab-delimited.
-            The header should be [source, values, date, ID].
-
-    Attributes:
-        _data (DataFrame): The trait data.
-        _result (dict): The extracted traits.
-
-    Methods:
-        _data_filtering: Abstract method for filtering the data.
-        _trait_extract: Abstract method for extracting traits.
-        get_trait: Method to get the extracted traits.
-        get_data: Method to get the trait data.
-    """
-
-    def __init__(self, data_path: Path):
-
-        self._data = self._read_data(data_path)
-        self._filtering = False
-        self._result = {}
-
-    @abstractmethod
-    def _read_data(self, data_path):
-        raise NotImplementedError('read_data has not been Implemented yet')
-
-    @abstractmethod
-    def _data_filtering(self):
-        raise NotImplementedError('filtering has not been Implemented yet')
-
-    @abstractmethod
-    def _trait_extract(self):
-        raise NotImplementedError('tarit_extract has not been Implemented yes')
-
-    @property
-    def trait(self):
-        """Get the extracted traits.
-
-        Returns:
-            dict: The extracted traits.
-        """
-        self._data_filtering()
-        self._trait_extract()
-        return self._result
-
-    @property
-    def data(self):
-        """Get the trait data.
-
-        Returns:
-            DataFrame: The trait data.
-        """
-        self._data_filtering()
-        return self._data
+from phenocv import registry, Config
+from phenocv.utils import scandir, Results, check_path, \
+    save_img
 
 
-class HeadingDateExtractor(TraitExtractor):
-    """A class for extracting heading date traits from data.
+class Analyzer(metaclass=ABCMeta):
+    def __init__(self, cfg: Path):
 
-    Parameters:
-    - data_path (Path):
-        The path to the data file.
-    - seeding_date (Union[str, int]):
-        The seeding date in the format 'YYYY-MM-DD'.
-    - heading_stage (Tuple[float, float]):
-        The range of heading stage as a tuple of two floats.
-    - percents (Tuple[float]):
-        The list of percents to calculate.
+        self.cfg = Config().from_disk(cfg)
+        resolver = registry.resolve(self.cfg)
+        for name, obj in resolver.items():
+            setattr(self, name, obj)
+
+    def predict(self, img: Union[str, Path]) -> Results:
+
+        result = img
+        if hasattr(self, 'preprocessor'):
+            result = self.preprocessor(result)
+
+        if hasattr(self, 'predictor'):
+            result = self.predictor(result)
+        else:
+            raise AttributeError('predictor is not defined')
+
+        return result
+
+    def postprocess(self):
+        if hasattr(self, 'formatter'):
+            result = self.formatter()
+        else:
+            raise AttributeError('formatter is not defined')
+
+        if hasattr(self, 'postprocessor'):
+            result = self.postprocessor(result)
+
+        if hasattr(self, 'extractor'):
+            result = self.extractor(result)
+
+        return result
+
+    def clear(self):
+        for attr in dir(self):
+            if attr.startswith('_'):
+                continue
+            if hasattr(getattr(self, attr), 'clear'):
+                getattr(self, attr).clear()
 
 
-    Attributes:
-    - _seeding_date (numpy.datetime64): The seeding date.
-    - _precents (Tuple[float]): The list of percents to calculate.
-    - _heading_stage (Tuple[float]): The range of heading stage.
-    - _filtering (bool): Indicates if data filtering has been performed.
-    - _result (Dict[str, Any]):
-        The dictionary to store the extracted traits.
-
-    Methods:
-    - _data_filtering():
-        Performs data filtering.
-    - _trait_extract():
-        Extracts the heading date traits.
-    - _round_percent(values: np.ndarray, percent: float):
-        Rounds the percent value to the nearest index.
-    - _percent(percent: float):
-        Converts the percent value to a string representation.
-    - _cal_heading_stage(): Calculates the heading stage traits.
-    """
+class PanicleAnalyzer(Analyzer):
 
     def __init__(self,
-                 data_path: Path,
-                 seeding_date: Union[str, int],
-                 heading_stage=(0.1, 0.8),
-                 percents=(0.1, 0.3, 0.5, 0.8)):
-        date_pattern = r'^\d{4}-\d{2}-\d{2}$'
-        match = re.match(date_pattern, seeding_date)
-        if not match:
-            raise ValueError(
-                'The format of seeding_date should be YYYY-MM-DD' +
-                f', but got {seeding_date}')
+                 cfg: Path | str,
+                 save_file: Path | str,
+                 out_dir_suffix: str = '_result',
+                 ):
 
-        if not all(stage in percents for stage in heading_stage):
-            raise ValueError('heading_stage should be included in percents')
+        super().__init__(cfg)
+        self.out_dir_suffix = out_dir_suffix
+        self.save_file = Path(save_file)
 
-        self._seeding_date = np.datetime64(seeding_date)
-        self._precents = sorted(percents)
-        self._heading_stage = sorted(heading_stage)
+        self._check_attrs()
 
-        super().__init__(data_path=data_path)
-        check_data = (self._data.columns == ['source', 'values', 'date',
-                                             'ID']).all()
+    def _check_attrs(self):
+        attrs = ['preprocessor', 'predictor', 'formatter',
+                 'postprocessor', 'extractor']
+        for attr in attrs:
+            if not hasattr(self, attr):
+                print(f'{attr} is not defined, '
+                      f'please check your config file.\n Your config is: \n')
+                pprint(self.cfg)
+                raise AttributeError
 
-        if not check_data:
-            raise ValueError(
-                "The trait file's header is [source, values, date, ID],"
-                f'but found {list(self._data.columns)}')
+    def prepare_dir(self, img_dir: Union[str, Path]):
+        check_path(img_dir)
+        img_dir = Path(img_dir)
+        _id = img_dir.name
+        result_dir = img_dir.parent / (img_dir.name + self.out_dir_suffix)
+        result_dir.mkdir()
 
-    def _read_data(self, data_path):
-        """Read the trait data from a file.
+        return img_dir, result_dir, _id
 
-        Args:
-            data_path (str): The path to the trait data file.
+    def __call__(self,
+                 img_dir: Union[str, Path],
+                 img_suffix: str = 'jpg',
+                 classes: Optional[str] = 'panicle',
+                 save_pred: bool = False,):
 
-        Returns:
-            pandas.DataFrame: The trait data.
+        img_dir, result_dir, _id = self.prepare_dir(img_dir)
+        img_paths = sorted(list(scandir(img_dir, suffix=img_suffix)))
 
-        Raises:
-            ValueError: If the header of the trait file does not
-            match the expected format.
-        """
-        with open(data_path) as f:
-            first_line = f.readline()
-            first_line = first_line.strip().split('\t')
+        if save_pred:
+            pred_dir = result_dir / 'pred'
+            pred_dir.mkdir()
 
-        check_data = (first_line == ['source', 'values', 'date', 'ID'])
+        raw_csv = result_dir / f'{_id}_raw.csv'
+        interp_csv = result_dir / f'{_id}_interp.csv'
+        _img = result_dir / f'{_id}.png'
 
-        if not check_data:
-            raise ValueError(
-                "The trait file's header is [source, values, date, ID],"
-                f'but found {first_line}')
+        for img_path in img_paths:
+            result = self.predict(str(img_dir / img_path))
+            if save_pred:
+                save_img(result.plot(conf=True, labels=True, line_width=5),
+                         pred_dir / img_path)
+            num_boxes = result.num_bbox[classes] if (classes in
+                                                     result.num_bbox) else (
+                len(result))
 
-        data = pd.read_table(data_path, parse_dates=['date'])
+            self.formatter.update(dict(
+                source=img_path,
+                value=num_boxes,
+            ))
 
-        return data
+        result = self.postprocess()
 
-    def _data_filtering(self):
-        if self._filtering:
-            return
-        max_row = self._data[self._data['values'] == 0].index.max()
-        if max_row is not np.nan:
-            self._data.loc[:max_row, 'values'] = 0
-        self._filtering = True
+        self.formatter.save(raw_csv)
+        self.postprocessor.save(interp_csv)
+        self.extractor.save(self.save_file)
+        self.extractor.plot(_img)
 
-    def _trait_extract(self):
-
-        if not self._filtering:
-            self._data_filtering()
-
-        values = self._data['values'].to_numpy()
-        date = self._data['date'].to_numpy().astype('datetime64[D]')
-
-        self._result['max'] = values.max()
-        self._result['num_sources'] = len(values)
-
-        for idx, percent in enumerate(self._precents):
-            if idx == 0:
-                pre_idx = 0
-            index = self._round_percent(values, percent, pre_idx)
-            _date = (date[index] - self._seeding_date).astype(int)
-            pre_idx = index
-            self._result[self._percent_format(percent)] = (_date, date[index])
-
-        self._cal_heading_stage()
-
-    def _round_percent(self, values: np.ndarray, percent: float, pre_idx):
-        """Rounds the given percent of the maximum value in the array and
-        returns the index.
-
-        Args:
-            values (np.ndarray): The array of values.
-            percent (float): The percentage of the maximum value to round.
-            pre_idx: The index to start searching for the rounded value.
-
-        Returns:
-            int: The index of the rounded value.
-        """
-
-        max_index = values.argmax()
-
-        if percent < 0 or percent > 1:
-            raise ValueError(
-                f'percent should between 0 and 1, but got {percent}')
-
-        percent_value = self._result['max'] * percent
-        percent_index = np.abs(values[pre_idx:max_index] -
-                               percent_value).argmin() + pre_idx
-
-        return percent_index
-
-    @staticmethod
-    def _percent_format(percent: float):
-        return f'{int(percent * 100)}%'
-
-    def _cal_heading_stage(self):
-
-        hstart = self._percent_format(self._heading_stage[0])
-        hend = self._percent_format(self._heading_stage[1])
-
-        self._result[
-            f'{hstart}-{hend}'] = self._result[hend] - self._result[hstart]
-
-
-class YOLOTillerExtractor(TraitExtractor):
-
-    def __init__(self, data_dir: Path):
-        super().__init__(data_path=data_dir)
-
-    def _read_data(self, data_path):
-        data_dir = Path(data_path)
-
-        txts = data_dir.glob('*.txt')
-        names = []
-        nums = []
-        for txt in txts:
-            names.append(txt.stem)
-            nums.append(self.read_txt_lines(txt))
-        return pd.DataFrame(dict(ID=names, values=nums))
-
-    def read_txt_lines(self, txt_path):
-        with open(txt_path) as f:
-            lines = [line.strip() for line in f]
-        return len(lines)
-
-    def _data_filtering(self):
-        pass
-
-    def _trait_extract(self):
-
-        data = self._data.copy()
-
-        id_pattern = r'GP\d{3}-\d{1}'
-        date_pattern = r'\d{8}'
-
-        data['Date'] = data['ID'].apply(
-            lambda x: re.search(date_pattern, x).group())
-        data['ID'] = data['ID'].apply(
-            lambda x: re.search(id_pattern, x).group())
-        data['sub_ID'] = data['ID'].apply(lambda x: x.split('-')[1])
-        data['ID'] = data['ID'].apply(lambda x: x.split('-')[0])
-
-        data = data[['ID', 'sub_ID', 'Date', 'values']]
-
-        self._result = data
+        self.clear()

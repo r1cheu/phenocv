@@ -51,7 +51,7 @@ def main():
     model.add_callback('on_pretrain_routine_end',
                        callback_custom_albumentations)
     model.train(
-        data='~/ProJect/phenocv/configs/yolo/panicle_drone.yaml',
+        data='~/ProJect/phenocv/configs/yolo/panicle_gantry.yaml',
         flipud=0.5,
         imgsz=1280,
         device='0,1,2,3',

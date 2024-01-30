@@ -145,7 +145,7 @@ class SamAutomaticMaskGenerator:
                area (int): The area in pixels of the mask.
                predicted_iou (float): The model's own prediction of the mask's
                  quality. This is filtered by the pred_iou_thresh parameter.
-               point_coords (list(list(float))): The point coordinates input
+               point_coords (list(list(float))): The point coordinates path
                  to the model to generate this mask.
                stability_score (float): A measure of the mask's quality. This
                  is filtered on using the stability_score_thresh parameter.

@@ -24,12 +24,12 @@ class TwoWayTransformer(nn.Module):
         activation: Type[nn.Module] = nn.ReLU,
         attention_downsample_rate: int = 2,
     ) -> None:
-        """A transformer decoder that attends to an input image using queries
+        """A transformer decoder that attends to an path image using queries
         whose positional embedding is supplied.
 
         Args:
           depth (int): number of layers in the transformer
-          embedding_dim (int): the channel dimension for the input embeddings
+          embedding_dim (int): the channel dimension for the path embeddings
           num_heads (int): the number of heads for multihead attention. Must
             divide embedding_dim
           mlp_dim (int): the channel dimension internal to the MLP block

@@ -23,18 +23,18 @@ class PromptEncoder(nn.Module):
         mask_in_chans: int,
         activation: Type[nn.Module] = nn.GELU,
     ) -> None:
-        """Encodes prompts for input to SAM's mask decoder.
+        """Encodes prompts for path to SAM's mask decoder.
 
         Arguments:
           embed_dim (int): The prompts' embedding dimension
           image_embedding_size (tuple(int, int)): The spatial size of the
             image embedding, as (H, W).
-          input_image_size (int): The padded size of the image as input
+          input_image_size (int): The padded size of the image as path
             to the image encoder, as (H, W).
           mask_in_chans (int): The number of hidden channels used for
-            encoding input masks.
+            encoding path masks.
           activation (nn.Module): The activation to use when encoding
-            input masks.
+            path masks.
         """
         super().__init__()
         self.embed_dim = embed_dim
@@ -118,7 +118,7 @@ class PromptEncoder(nn.Module):
         boxes: Optional[torch.Tensor],
         masks: Optional[torch.Tensor],
     ) -> int:
-        """Gets the batch size of the output given the batch size of the input
+        """Gets the batch size of the output given the batch size of the path
         prompts."""
         if points is not None:
             return points[0].shape[0]
@@ -149,7 +149,7 @@ class PromptEncoder(nn.Module):
 
         Returns:
           torch.Tensor: sparse embeddings for the points and boxes, with shape
-            BxNx(embed_dim), where N is determined by the number of input
+            BxNx(embed_dim), where N is determined by the number of path
             points and boxes.
           torch.Tensor: dense embeddings for the masks, in the shape
             Bx(embed_dim)x(embed_H)x(embed_W)

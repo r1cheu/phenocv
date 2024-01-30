@@ -1,50 +1,66 @@
-exclude: ^tests/data/
+# Ultralytics YOLO 🚀, AGPL-3.0 license
+# Pre-commit hooks. For more information see https://github.com/pre-commit/pre-commit-hooks/blob/main/README.md
+# Optionally remove from local hooks with 'rm .git/hooks/pre-commit'
+
+# Define bot property if installed via https://github.com/marketplace/pre-commit-ci
+ci:
+  autofix_prs: true
+  autoupdate_commit_msg: "[pre-commit.ci] pre-commit suggestions"
+  autoupdate_schedule: monthly
+  submodules: true
+
+# Exclude directories (optional)
+# exclude: 'docs/'
+
+# Define repos to run
 repos:
-  - repo: https://github.com/PyCQA/flake8
-    rev: 5.0.4
-    hooks:
-      - id: flake8
-  - repo: https://github.com/PyCQA/isort
-    rev: 5.11.5
-    hooks:
-      - id: isort
-  - repo: https://github.com/pre-commit/mirrors-yapf
-    rev: v0.32.0
-    hooks:
-      - id: yapf
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.3.0
+    rev: v4.5.0
     hooks:
-      - id: trailing-whitespace
-      - id: check-yaml
       - id: end-of-file-fixer
-      - id: requirements-txt-fixer
-      - id: double-quote-string-fixer
-      - id: check-merge-conflict
-      - id: fix-encoding-pragma
-        args: ["--remove"]
-      - id: mixed-line-ending
-        args: ["--fix=lf"]
-  - repo: https://github.com/codespell-project/codespell
-    rev: v2.2.1
-    hooks:
-      - id: codespell
-  - repo: https://github.com/executablebooks/mdformat
-    rev: 0.7.9
-    hooks:
-      - id: mdformat
-        args: ["--number"]
-        additional_dependencies:
-          - mdformat-openmmlab
-          - mdformat_frontmatter
-          - linkify-it-py
-  - repo: https://github.com/myint/docformatter
-    rev: v1.3.1
-    hooks:
-      - id: docformatter
-        args: ["--in-place", "--wrap-descriptions", "79"]
+      - id: trailing-whitespace
+      - id: check-case-conflict
+      # - id: check-yaml
+      - id: check-docstring-first
+      - id: detect-private-key
+
   - repo: https://github.com/asottile/pyupgrade
-    rev: v3.0.0
+    rev: v3.15.0
     hooks:
       - id: pyupgrade
-        args: ["--py36-plus"]
+        name: Upgrade code
+
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.1.11
+    hooks:
+      - id: ruff
+        args: [--fix]
+
+  - repo: https://github.com/executablebooks/mdformat
+    rev: 0.7.17
+    hooks:
+      - id: mdformat
+        name: MD formatting
+        additional_dependencies:
+          - mdformat-gfm
+          - mdformat-frontmatter
+          - mdformat-mkdocs
+        args:
+          - --wrap=no
+          - --number
+        exclude: 'docs/.*\.md'
+        # exclude: "README.md|README.zh-CN.md|CONTRIBUTING.md"
+
+  - repo: https://github.com/codespell-project/codespell
+    rev: v2.2.6
+    hooks:
+      - id: codespell
+        exclude: "docs/de|docs/fr|docs/pt|docs/es|docs/mkdocs_de.yml"
+        args:
+          - --ignore-words-list=crate,nd,ned,strack,dota,ane,segway,fo,gool,winn,commend,bloc,nam,afterall
+
+  - repo: https://github.com/hadialqattan/pycln
+    rev: v2.4.0
+    hooks:
+      - id: pycln
+        args: [--all]

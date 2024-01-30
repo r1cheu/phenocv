@@ -1,5 +1,6 @@
 import cv2
 import numpy as np
+import pandas as pd
 
 
 def resize(image: np.ndarray, target_size=1000):
@@ -21,10 +22,10 @@ def resize(image: np.ndarray, target_size=1000):
 
 def binarize_cive(img: np.ndarray) -> np.ndarray:
     """Binarize an image using the CIVE (Color Index of Vegetation Extraction)
-    algorithm.
+    and OTSU algorithm.
 
     Parameters:
-    img (numpy.ndarray): The input image.
+    img (numpy.ndarray): The path image.
 
     Returns:
     numpy.ndarray: The binarize image.
@@ -40,11 +41,11 @@ def moving_average(interval, window_size):
     """Calculate the moving average of a given interval.
 
     Parameters:
-    interval (array-like): The input interval.
+    interval (array-like): The path interval.
     window_size (int): The size of the moving window.
 
     Returns:
-    array-like: The moving average of the input interval.
+    array-like: The moving average of the path interval.
     """
     window = np.ones(int(window_size)) / float(window_size)
     re = np.convolve(interval, window, 'valid')
@@ -55,7 +56,7 @@ def min_sum(x, length, window_size):
     """Calculate the index range with the minimum sum of a given array.
 
     Parameters:
-    x (array-like): The input array.
+    x (array-like): The path array.
     length (int): The length of the index range.
     window_size (int): The window size for moving average.
 
@@ -66,3 +67,25 @@ def min_sum(x, length, window_size):
     i_sum = x[:-length] + x[length:]
     index = np.argmin(i_sum) + window_size
     return index, index + length
+
+
+def cut_up_curve(df: pd.DataFrame):
+    start_idx = df[df['value'] == 0].index.max()
+    end_idx = df['value'].idxmax()
+    assert (start_idx < end_idx), 'start_idx should be smaller than ' \
+                                  'end_idx'
+    return start_idx, end_idx
+
+
+def logistic(x, K, x0, r):
+    return K / (1 + np.exp(-(x - x0) / r))
+
+
+def inverse_logistic(K, x0, r, y):
+    return x0 - r * np.log(K / y - 1)
+
+
+def remove_smaller(arr):
+    mask = np.r_[True, (arr[1:-1] >= arr[:-2]) | (
+            arr[1:-1] >= arr[2:]), True]
+    return mask

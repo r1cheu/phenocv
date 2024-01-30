@@ -9,7 +9,7 @@ from pathlib import Path
 import cv2
 from tqdm import tqdm
 
-from phenocv.utils import check_path
+from phenocv.utils import check_img_input
 from .base import YOLOto
 
 
@@ -94,7 +94,7 @@ class YOLOtoCOCO(YOLOto):
             # e.g. images/images(3).jpg
             img_path = self.raw_data_dir / img_path
 
-        check_path(img_path)
+        check_img_input(img_path)
 
         new_img_name = f'{img_path.stem}.jpg'
         save_img_path = save_img_dir / new_img_name

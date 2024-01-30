@@ -15,7 +15,7 @@ except ModuleNotFoundError:
 def parse_args():
     parser = argparse.ArgumentParser(
         description='Convert COCO labeling to Label Studio JSON')
-    parser.add_argument('--input-file', help='JSON file with COCO annotations')
+    parser.add_argument('--path-file', help='JSON file with COCO annotations')
     parser.add_argument('--output-file', help='output Label Studio JSON file')
     parser.add_argument(
         '--image-root-url',
@@ -108,7 +108,7 @@ def convert_coco_to_ls(
     converter/blob/master/label_studio_converter/imports/coco.py.
 
     Args:
-        input_file (str): input json file path with COCO annotations
+        input_file (str): path json file path with COCO annotations
         out_file (str): output json file path with Label Studio annotations
         from_name (str, optional): Name of the tag used to label the region in
             Label Studio. Defaults to 'label'.

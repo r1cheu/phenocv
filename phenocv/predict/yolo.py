@@ -1,20 +1,24 @@
 from collections import namedtuple
-from typing import Tuple
+from pathlib import Path
+from typing import Tuple, Dict
 
 import numpy as np
 import torch
+from sahi.predict import get_sliced_prediction
 from segment_anything import SamPredictor, sam_model_registry
 from sklearn.cluster import DBSCAN
-from ultralytics.engine.results import Results
+from torch import Tensor
 
-from .base_yolo import YoloInfer, YoloSahiInfer
+from phenocv.utils import Results, read_image
+from .base_yolo import YoloPredictor, YoloSahiPredictor
 from .utils import compute_dist, generate_label, make_label_box_map, mask2rbox
 
-ODresult = namedtuple('ODresult',
-                      ['path', 'image', 'label', 'bboxes', 'label2box'])
+# TODO: need to refactor this file
+object_result = namedtuple('object_result',
+                           ['path', 'image', 'label', 'bboxes', 'label2box'])
 
 
-class YoloStubbleUav(YoloInfer):
+class YoloStubbleUav(YoloPredictor):
     """YOLOStubbleUAV is a class that performs inference using YOLO model for
     detecting stubble in UAV images.
 
@@ -56,7 +60,6 @@ class YoloStubbleUav(YoloInfer):
             col (int): The column index of the image when processing a grid of
                 images.
         """
-        self._clear()
         results = self.model.predict(source, conf=conf, iou=iou, verbose=False)
 
         if row or col is not None:
@@ -68,7 +71,7 @@ class YoloStubbleUav(YoloInfer):
             result = self.process(_result, row, col)
             self._results.append(result)
 
-    def process(self, result, row=None, col=None) -> ODresult:
+    def process(self, result, row=None, col=None):
         """Processes the inference result and returns a StubbleGrid object.
 
         Args:
@@ -100,7 +103,7 @@ class YoloStubbleUav(YoloInfer):
         non_zero = (bboxes == np.zeros(4)).any(axis=1)
         label2box = make_label_box_map(label[~non_zero], bboxes[~non_zero])
 
-        return ODresult(
+        return object_result(
             image=img,
             path=result.path,
             label=label,
@@ -190,7 +193,8 @@ class YoloStubbleUav(YoloInfer):
         return True
 
 
-class YoloStubbleDrone(YoloInfer):
+class YoloStubbleDrone(YoloPredictor):
+
     """YOLOStubbleDrone is a class that performs inference using YOLO model for
     detecting stubble from image taken by drones.
 
@@ -206,7 +210,7 @@ class YoloStubbleDrone(YoloInfer):
         names = self.model.names
         label = [f'{names[cls]} {conf:.2f}' for conf, cls in raw_bbox[:, 4:]]
 
-        return ODresult(
+        return object_result(
             image=img,
             path=result.path,
             bboxes=bboxes,
@@ -225,7 +229,7 @@ class YoloTillerDrone(YoloStubbleDrone):
     pass
 
 
-class YoloSamObb(YoloInfer):
+class YoloSamObb(YoloPredictor):
     """
     YOLOSAMOBB is a class that convert horizontal bounding box to orientational
     bounding box using YOLO model with SAM.
@@ -266,6 +270,7 @@ class YoloSamObb(YoloInfer):
             sam_type (str): The type of SAM model to use.
             sam_weight (str): The path to the SAM model weights.
         """
+
         build_sam = sam_model_registry[sam_type]
         sam_model = SamPredictor(build_sam(checkpoint=sam_weight))
         sam_model.model = sam_model.model.to(self.device)
@@ -315,7 +320,7 @@ class YoloSamObb(YoloInfer):
         r_bboxes = [mask2rbox(mask.numpy()) for mask in masks]
         r_bboxes = np.stack(r_bboxes, axis=0)
 
-        return ODresult(
+        return object_result(
             image=img,
             path=result.path,
             bboxes=r_bboxes,
@@ -323,18 +328,108 @@ class YoloSamObb(YoloInfer):
             label2box=None)
 
 
-class YoloPanicleUav(YoloSahiInfer):
+class YoloSahiPanicleUavPredictor(YoloSahiPredictor):
 
-    def process(self, result: Results):
-        img = result.orig_img
-        raw_bbox = self._get_raw_bbox(result)
-        bboxes = raw_bbox[:, :4]
+    def _sahi_infer(self,
+                    source):
+        """Perform Sahi inference on the given source image."""
+
+        # Prepare the image, original image, path, old box and names based
+        # on the type of source
+        if isinstance(source, Results):
+            img, orig_img, path, old_box, names = self._prepare_source_from_results(
+                source)
+        elif isinstance(source, (str, Path)):
+            img, orig_img, path, old_box, names = self._prepare_source_from_path(
+                source)
+        else:
+            raise TypeError('source must be a Results, str or Path object.')
+
+        # Get sliced prediction
+        results = get_sliced_prediction(img,
+                                        self.model,
+                                        self.slice_height,
+                                        self.slice_width,
+                                        self.overlap_height_ratio,
+                                        self.overlap_width_ratio,
+                                        postprocess_match_threshold=self.iou,
+                                        verbose=0)
+
+        # Convert results to YOLO format and stack them
+        yolo_result = [self._sahi_to_yolo(result) for result in
+                       results.object_prediction_list]
+
+        if len(yolo_result) == 0:
+            boxes = None
+        else:
+            boxes = torch.stack(yolo_result, dim=0)
+
+        # If old box exists, adjust boxes
+        if old_box is not None:
+            boxes = self._adjust_boxes_with_old_box(boxes, old_box)
+
+        return Results(orig_img=orig_img, path=path, names=names, boxes=boxes)
+
+    def _prepare_source_from_results(self, source):
+        img = source.crop_img()[:, :, ::-1]
+        orig_img = source.orig_img
+        path = source.path
+        old_box, names = self.update_old_box(source)
+        return img, orig_img, path, old_box, names
+
+    def _prepare_source_from_path(self, source):
+        img = read_image(source)
+        orig_img = img
+        path = str(source)
+        old_box = None
         names = self.model.model.names
-        label = [f'{names[cls]} {conf:.2f}' for conf, cls in raw_bbox[:, 4:]]
+        return img, orig_img, path, old_box, names
 
-        return ODresult(
-            image=img,
-            path=result.path,
-            bboxes=bboxes,
-            label=label,
-            label2box=None)
+    def _adjust_boxes_with_old_box(self, boxes: Tensor, old_box):
+        if boxes is None:
+            return old_box
+
+        add_box = old_box.clone().zero_()
+        add_box[:, :4] = torch.cat([old_box[:, :2], old_box[:, :2]], dim=1)
+        add_box = add_box.repeat(boxes.shape[0], 1).to(boxes.device)
+
+        boxes += add_box
+        return torch.cat([old_box, boxes], dim=0)
+
+    def update_old_box(self, old_results: Results) -> Tuple[Tensor, Dict]:
+        """Updates the old results with the new results.
+
+        Args:
+            old_results (Results): The old results.
+
+        Returns:
+            Results: The updated results.
+        """
+
+        old_names = old_results.names
+        old_boxes = old_results.boxes.data
+        new_names = self.model.model.names
+
+        # get unique value from new_names and old_names
+        names = {*old_names.values(), *new_names.values()}
+
+        # keep the order of the new_names, add the category_id in old_names
+        # to it.
+        new_names_rev = {v: k for k, v in new_names.items()}
+        final_dict = {new_names_rev[name]: name for name in names if
+                      name in new_names_rev}
+
+        # if the old_names is not in the new_names, add it to the final_dict
+        for v in old_names.values():
+            if v not in final_dict.values():
+                final_dict[len(final_dict)] = v
+
+        final_dict_rev = {v: k for k, v in final_dict.items()}
+
+        # update the old_boxes
+        for i in range(old_boxes.shape[0]):
+            category_id = int(old_boxes[i, -1])
+            category = old_names[category_id]
+            old_boxes[i, -1] = final_dict_rev[category]
+
+        return torch.Tensor(old_boxes), final_dict

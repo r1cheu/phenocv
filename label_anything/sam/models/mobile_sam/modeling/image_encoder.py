@@ -39,7 +39,7 @@ class ImageEncoderViT(nn.Module):
         Args:
             img_size (int): Input image size.
             patch_size (int): Patch size.
-            in_chans (int): Number of input image channels.
+            in_chans (int): Number of path image channels.
             embed_dim (int): Patch embedding dimension.
             depth (int): Depth of ViT.
             num_heads (int): Number of attention heads in each ViT block.
@@ -141,7 +141,7 @@ class Block(nn.Module):
     ) -> None:
         """
         Args:
-            dim (int): Number of input channels.
+            dim (int): Number of path channels.
             num_heads (int): Number of attention heads in each ViT block.
             mlp_ratio (float): Ratio of mlp hidden dim to embedding dim.
             qkv_bias (bool): If True, add a learnable bias to query, key,
@@ -208,7 +208,7 @@ class Attention(nn.Module):
     ) -> None:
         """
         Args:
-            dim (int): Number of input channels.
+            dim (int): Number of path channels.
             num_heads (int): Number of attention heads.
             qkv_bias (bool):  If True, add a learnable bias to query,
                 key, value.
@@ -266,7 +266,7 @@ def window_partition(x: torch.Tensor,
     """
     Partition into non-overlapping windows with padding if needed.
     Args:
-        x (tensor): input tokens with [B, H, W, C].
+        x (tensor): path tokens with [B, H, W, C].
         window_size (int): window size.
 
     Returns:
@@ -295,7 +295,7 @@ def window_unpartition(windows: torch.Tensor, window_size: int,
     """
     Window unpartition into original sequences and removing padding.
     Args:
-        windows (tensor): input tokens with
+        windows (tensor): path tokens with
             [B * num_windows, window_size, window_size, C].
         window_size (int): window size.
         pad_hw (Tuple): padded height and width (Hp, Wp).
@@ -409,7 +409,7 @@ class PatchEmbed(nn.Module):
             kernel_size (Tuple): kernel size of the projection layer.
             stride (Tuple): stride of the projection layer.
             padding (Tuple): padding size of the projection layer.
-            in_chans (int): Number of input image channels.
+            in_chans (int): Number of path image channels.
             embed_dim (int): Patch embedding dimension.
         """
         super().__init__()

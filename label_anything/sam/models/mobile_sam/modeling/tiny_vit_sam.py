@@ -340,7 +340,7 @@ class TinyViTBlock(nn.Module):
     r""" TinyViT Block.
 
     Args:
-        dim (int): Number of input channels.
+        dim (int): Number of path channels.
         input_resolution (tuple[int, int]): Input resolution.
         num_heads (int): Number of attention heads.
         window_size (int): Window size.
@@ -401,7 +401,7 @@ class TinyViTBlock(nn.Module):
     def forward(self, x):
         H, W = self.input_resolution
         B, L, C = x.shape
-        assert L == H * W, 'input feature has wrong size'
+        assert L == H * W, 'path feature has wrong size'
         res_x = x
         if H == self.window_size and W == self.window_size:
             x = self.attn(x)
@@ -452,7 +452,7 @@ class BasicLayer(nn.Module):
     """A basic TinyViT layer for one stage.
 
     Args:
-        dim (int): Number of input channels.
+        dim (int): Number of path channels.
         input_resolution (tuple[int]): Input resolution.
         depth (int): Number of blocks.
         num_heads (int): Number of attention heads.

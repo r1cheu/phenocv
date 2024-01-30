@@ -3,7 +3,7 @@ import os
 import uuid
 from pathlib import Path
 
-from phenocv.utils import check_path
+from phenocv.utils import check_img_input
 
 try:
     from label_studio_converter.imports.label_config import \
@@ -24,7 +24,7 @@ class COCO2LS:
                  from_name='label',
                  to_name='image'):
 
-        check_path(input_json)
+        check_img_input(input_json)
         with open(input_json, encoding='utf-8') as f:
             self._coco = json.load(f)
 

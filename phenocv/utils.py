@@ -4,12 +4,33 @@ import os.path as osp
 import subprocess
 import sys
 import time
+import warnings
 from argparse import Action, ArgumentParser, Namespace
 from pathlib import Path
 from typing import Any, Sequence, Union
 
+import cv2
 import numpy as np
+import pandas as pd
+import torch
 from matplotlib import pyplot as plt
+from ultralytics.engine.results import Results as _Results
+
+
+def prepare_df(pred_data: Union[str, Path, pd.DataFrame]) -> (
+        pd.DataFrame):
+    if isinstance(pred_data, str):
+        pred_data = Path(pred_data)
+    if isinstance(pred_data, Path):
+        pred_data = pd.read_csv(pred_data)
+    if not isinstance(pred_data, pd.DataFrame):
+        raise TypeError(
+            f'pred_data should be str, Path or DataFrame, but got '
+            f' {type(pred_data)}')
+    if 'date' in pred_data.columns:
+        pred_data['date'] = pd.to_datetime(pred_data['date'])
+
+    return pred_data
 
 
 def scandir(dir_path, suffix=None, recursive=False, case_sensitive=True):
@@ -57,7 +78,6 @@ def scandir(dir_path, suffix=None, recursive=False, case_sensitive=True):
 
 
 def match_yolo_annotations(ann_dir, img_dir, img_suffix='.jpg'):
-
     ann_dir = Path(ann_dir)
     img_dir = Path(img_dir)
 
@@ -88,14 +108,14 @@ def match_yolo_annotations(ann_dir, img_dir, img_suffix='.jpg'):
 
 
 def prepare_io_dir(input_dir, output_dir, resume=False):
-    """Prepare input and output directories.
+    """Prepare path and output directories.
 
     Args:
-        input_dir (str | :obj:`Path`): Path of the input directory.
+        input_dir (str | :obj:`Path`): Path of the path directory.
         output_dir (str | :obj:`Path`): Path of the output directory.
 
     Returns:
-        A tuple containing the input and output directories.
+        A tuple containing the path and output directories.
     """
     if not isinstance(input_dir, (str, Path)):
         raise TypeError('"input_dir" must be a string or Path object')
@@ -163,13 +183,53 @@ def exec_par(cmds, max_proc=None, verbose=False):
 
 
 def check_path(path):
+    if isinstance(path, (str, Path)):
+        if not Path(path).exists():
+            raise FileNotFoundError(f'{path} does not exist.')
+    else:
+        raise TypeError('Input must be a string, Path object or a 3D array.')
 
-    if not isinstance(path, (str, Path)):
-        raise TypeError('The input path must be a string or a Path object,' +
-                        f'but got {type(path)}')
 
-    if not Path(path).exists():
-        raise FileNotFoundError(f'{path} does not exist.')
+def read_image(img: Union[str, Path],  order='BGR'):
+
+    """Read an image from file or a numpy array.
+
+    Args:
+        img (str | :obj:`Path` | :obj:`np.ndarray`): Path of the image file or
+            a numpy array.
+        order (str, optional): Order of channel. Defaults to 'BGR'.
+
+    Returns:
+        np.ndarray: Loaded image array. BGR order.
+    """
+
+    if isinstance(img, (str, Path)):
+
+        img = str(img)
+        if not Path(img).exists():
+            raise FileNotFoundError(f'{img} does not exist.')
+        img = cv2.imread(img)
+
+        if order == 'RGB':
+            img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+
+    else:
+        raise TypeError('Input must be a string or Path object')
+
+    return img
+
+
+def save_img(img: np.ndarray, file_path: Union[str, Path], order='BGR'):
+    """Save an image to file.
+
+    Args:
+        img (np.ndarray): Image array to be saved.
+        file_path (str | :obj:`Path`): Path of the image file.
+        order (str, optional): Order of channel. Defaults to 'BGR'.
+    """
+    if order == 'RGB':
+        img = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
+    cv2.imwrite(str(file_path), img)
 
 
 def write_file(file_path, content, mode='a'):
@@ -307,3 +367,42 @@ def imshow(img: np.ndarray, figsz=(20, 12)):
     ax.tick_params(
         bottom=False, left=False, labelbottom=False, labelleft=False)
     plt.show()
+
+
+class Results(_Results):
+
+    def crop_img(self):
+        """Return the cropped image in np.ndarray format. Only works for single
+        box case.
+        """
+        boxes = copy.deepcopy(self.boxes)
+        if not boxes.data.shape[0] == 1:
+            warnings.warn('Only works for single box case. For multiple '
+                          'boxes, it will return the box with the highest '
+                          'conf, be careful.')
+            box = boxes.xyxy[boxes.conf.argmax()].int().tolist()
+        else:
+            box = boxes.xyxy[0].int().tolist()
+        img = self.orig_img.copy()
+
+        return img[box[1]:box[3], box[0]:box[2]]
+
+    @classmethod
+    def from_yolo(cls, results: _Results):
+        """Convert original ultralytics Results to custom."""
+        return cls(orig_img=results.orig_img,
+                   path=results.path,
+                   names=results.names,
+                   boxes=results.boxes.data,
+                   masks=results.masks,
+                   probs=results.probs,
+                   keypoints=results.keypoints, )
+
+    @property
+    def num_bbox(self):
+        num_dict = {}
+        bbox = copy.deepcopy(self.boxes)
+        for k, v in self.names.items():
+            num = torch.sum(bbox.cls == k).item()
+            num_dict[v] = num
+        return num_dict

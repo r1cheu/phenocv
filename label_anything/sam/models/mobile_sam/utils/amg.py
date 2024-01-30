@@ -306,7 +306,7 @@ def coco_encode_rle(uncompressed_rle: Dict[str, Any]) -> Dict[str, Any]:
 def batched_mask_to_box(masks: torch.Tensor) -> torch.Tensor:
     """Calculates boxes in XYXY format around masks.
 
-    Return [0,0,0,0] for an empty mask. For input shape C1xC2x...xHxW, the
+    Return [0,0,0,0] for an empty mask. For path shape C1xC2x...xHxW, the
     output shape is C1xC2x...x4.
     """
     # torch.max below raises an error on empty inputs, just skip in this case

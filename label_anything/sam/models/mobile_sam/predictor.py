@@ -65,11 +65,11 @@ class SamPredictor:
         original_image_size: Tuple[int, ...],
     ) -> None:
         """Calculates the image embeddings for the provided image, allowing
-        masks to be predicted with the 'predict' method. Expects the input
+        masks to be predicted with the 'predict' method. Expects the path
         image to be already transformed to the format expected by the model.
 
         Arguments:
-          transformed_image (torch.Tensor): The input image, with shape
+          transformed_image (torch.Tensor): The path image, with shape
             1x3xHxW, which has been transformed with ResizeLongestSide.
           original_image_size (tuple(int, int)): The size of the image
             before transformation, in (H, W) format.
@@ -79,7 +79,7 @@ class SamPredictor:
             and transformed_image.shape[1] == 3
             and max(*transformed_image.shape[2:])
             == self.model.image_encoder.img_size
-        ), 'set_torch_image input must be BCHW with long side' + \
+        ), 'set_torch_image path must be BCHW with long side' + \
             f'{self.model.image_encoder.img_size}.'
         self.reset_image()
 
@@ -99,7 +99,7 @@ class SamPredictor:
         multimask_output: bool = True,
         return_logits: bool = False,
     ) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
-        """Predict masks for the given input prompts, using the currently set
+        """Predict masks for the given path prompts, using the currently set
         image.
 
         Arguments:
@@ -110,15 +110,15 @@ class SamPredictor:
             background point.
           box (np.ndarray or None): A length 4 array given a box prompt to the
             model, in XYXY format.
-          mask_input (np.ndarray): A low resolution mask input to the model,
+          mask_input (np.ndarray): A low resolution mask path to the model,
             typically coming from a previous prediction iteration.
             Has form 1xHxW, where for SAM, H=W=256.
           multimask_output (bool): If true, the model will return three masks.
-            For ambiguous input prompts (such as a single click), this will
+            For ambiguous path prompts (such as a single click), this will
             often produce better masks than a single prediction. If only a
             single mask is needed, the model's predicted quality score can be
             used to select the best mask. For non-ambiguous prompts, such as
-            multiple input prompts, multimask_output=False can give better
+            multiple path prompts, multimask_output=False can give better
             results.
           return_logits (bool): If true, returns un-thresholded masks logits
             instead of a binary mask.
@@ -130,13 +130,13 @@ class SamPredictor:
             predictions for the quality of each mask.
           (np.ndarray): An array of shape CxHxW, where C is the number
             of masks and H=W=256. These low resolution logits can be passed to
-            a subsequent iteration as mask input.
+            a subsequent iteration as mask path.
         """
         if not self.is_image_set:
             raise RuntimeError('An image must be set with .set_image(...) ' +
                                'before mask prediction.')
 
-        # Transform input prompts
+        # Transform path prompts
         coords_torch, labels_torch, box_torch, mask_input_torch = None, None, None, None  # noqa
         if point_coords is not None:
             assert (
@@ -184,9 +184,9 @@ class SamPredictor:
         multimask_output: bool = True,
         return_logits: bool = False,
     ) -> Tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
-        """Predict masks for the given input prompts, using the currently set
+        """Predict masks for the given path prompts, using the currently set
         image. Input prompts are batched torch tensors and are expected to
-        already be transformed to the input frame using ResizeLongestSide.
+        already be transformed to the path frame using ResizeLongestSide.
 
         Arguments:
           point_coords (torch.Tensor or None): A BxNx2 array of point prompts
@@ -196,16 +196,16 @@ class SamPredictor:
             background point.
           boxes (np.ndarray or None): A Bx4 array given a box prompt to the
             model, in XYXY format.
-          mask_input (np.ndarray): A low resolution mask input to the model,
+          mask_input (np.ndarray): A low resolution mask path to the model,
             typically coming from a previous prediction iteration. Has form
             Bx1xHxW, where for SAM, H=W=256. Masks returned by a previous
             iteration of the predict method do not need further transformation.
           multimask_output (bool): If true, the model will return three masks.
-            For ambiguous input prompts (such as a single click), this will
+            For ambiguous path prompts (such as a single click), this will
             often produce better masks than a single prediction. If only a
             single mask is needed, the model's predicted quality score can be
             used to select the best mask. For non-ambiguous prompts, such as
-            multiple input prompts, multimask_output=False can give better
+            multiple path prompts, multimask_output=False can give better
             results.
           return_logits (bool): If true, returns un-thresholded masks logits
             instead of a binary mask.
@@ -217,7 +217,7 @@ class SamPredictor:
             predictions for the quality of each mask.
           (torch.Tensor): An array of shape BxCxHxW, where C is the number
             of masks and H=W=256. These low res logits can be passed to
-            a subsequent iteration as mask input.
+            a subsequent iteration as mask path.
         """
         if not self.is_image_set:
             raise RuntimeError(

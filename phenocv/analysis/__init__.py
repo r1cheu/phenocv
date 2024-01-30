@@ -1,3 +1,5 @@
-from .traits import HeadingDateExtractor, TraitExtractor, YOLOTillerExtractor
+from .traits import (
+                     PanicleAnalyzer)
 
-__all__ = ['HeadingDateExtractor', 'TraitExtractor', 'YOLOTillerExtractor']
+__all__ = [
+           'PanicleAnalyzer']
