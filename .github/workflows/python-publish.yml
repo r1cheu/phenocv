@@ -56,7 +56,7 @@ jobs:
         continue-on-error: true
         if: (github.event_name == 'push' || github.event.inputs.pypi == 'true')  && steps.check_pypi.outputs.increment == 'True'
         env:
-          PYPI_API_TOKEN: ${{ secrets.PYPI_TOKEN }}
+          PYPI_TOKEN: ${{ secrets.PYPI_API_TOKEN }}
         run: |
           python -m build
-          python -m twine upload dist/* -u __token__ -p $PYPI_API_TOKEN
+          python -m twine upload dist/* -u __token__ -p $PYPI_TOKEN
