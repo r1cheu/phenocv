@@ -2,18 +2,25 @@
 
 ## Introduction
 
-**phenocv** is a toolkits for handling preporecess and postprocess for rice high-throught phenotyping images.
+**phenocv** is a toolkits for rice high-throught phenotyping using computer vision.
 
-**phenocv** it's a private use code library. Be free to use it, but no guarantee for any bugs.
+**phenocv** is still in early development stage, and more features will be added in the future.
 
 For label-studio semi-automatic annotation, please refer to [playground](https://github.com/open-mmlab/playground).
 
-For mmdection training, please refer to [mmdection](https://github.com/open-mmlab/mmdetection).
+For mmdetection training, please refer to [mmdetection](https://github.com/open-mmlab/mmdetection).
 
 For yolo training, please refer to [Ultralytics](https://github.com/ultralytics/ultralytics).
 
+Support for mmdetection and label-studio will be added in the future.
 ## Installation
+Before install the package, make sure you have installed [pytorch](https://pytorch.org/get-started/locally/) and install in the python environment with python>=3.8.
+### Install with pip:
+```shell
+pip install phenocv
+```
 
+### Install in editable mode, allow changes to the source code to be immediately available:
 ```shell
 git clone https://github.com/r1cheu/phenocv.git
 cd phenocv
@@ -22,7 +29,7 @@ pip install -e .
 
 ## License
 
-This project is released under the [Apache 2.0 license](LICENSE).
+This project is released under the [AGPL 3.0 license](LICENSE).
 
 ## Citation
 
