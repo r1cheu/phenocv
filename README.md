@@ -13,14 +13,19 @@ For mmdetection training, please refer to [mmdetection](https://github.com/open-
 For yolo training, please refer to [Ultralytics](https://github.com/ultralytics/ultralytics).
 
 Support for mmdetection and label-studio will be added in the future.
+
 ## Installation
+
 Before install the package, make sure you have installed [pytorch](https://pytorch.org/get-started/locally/) and install in the python environment with python>=3.8.
+
 ### Install with pip:
+
 ```shell
 pip install phenocv
 ```
 
 ### Install in editable mode, allow changes to the source code to be immediately available:
+
 ```shell
 git clone https://github.com/r1cheu/phenocv.git
 cd phenocv

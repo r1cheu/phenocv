@@ -52,11 +52,11 @@ class PaniclePostprocessor(Processor):
         _result['days'] = (_result['date'] - self.seeding_date).dt.days
         _result['interpolate'] = np.isnan(_result['value'])
 
-        _result['value'].interpolate(method='linear', inplace=True)
-        _result['value'].bfill(inplace=True)  # fill the first value
+        _result['value'] = _result['value'].interpolate(method='linear')
+        _result['value'] = _result['value'].bfill()  # fill the first value
 
-        _result['id'].bfill(inplace=True)  # fill the id
-        _result['id'].ffill(inplace=True)
+        _result['id'] = _result['id'].bfill() # convert to int
+        _result['id'] = _result['id'].ffill()
 
         _result = _result[['date', 'days', 'id', 'value', 'interpolate']]
         return _result

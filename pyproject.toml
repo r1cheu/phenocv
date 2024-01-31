@@ -42,9 +42,6 @@ dependencies = [
     "albumentations",
     "catalogue",
     "confection",
-    "label_studio_converter==0.0.55",
-    "label_studio_ml==1.0.9",
-    "label_studio_tools==0.0.3",
     "matplotlib",
     "numpy",
     "opencv_python",
@@ -77,6 +74,12 @@ dev = [
     "mkdocs-jupyter", # for notebooks
     "mkdocs-redirects", # for 301 redirects
     "mkdocs-ultralytics-plugin>=0.0.42", # for meta descriptions and images, dates and authors
+]
+
+label_studio = [
+    "label_studio_converter==0.0.55",
+    "label_studio_ml==1.0.9",
+    "label_studio_tools==0.0.3",
 ]
 
 # Tools settings -------------------------------------------------------------------------------------------------------
