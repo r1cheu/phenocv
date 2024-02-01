@@ -1,7 +1,7 @@
 from typing import Tuple, Union
 
 import catalogue
-from confection import registry
+from confection import Config, registry
 
 from phenocv.predict import YoloSahiPanicleUavPredictor
 from phenocv.process import (PanicleExtractor, PanicleFormatter,
@@ -88,3 +88,5 @@ def panicle_extractor(
 
 
 Register = registry
+
+__all__ = ['Register', 'Config']
