@@ -1,6 +1,5 @@
 _base_ = [
-    '../_base_/datasets/panicle_detection.py', '../_base_/custom_runtime.py'
-]
+    '../_base_/datasets/panicle_detection.py', '../_base_/custom_runtime.py']
 model = dict(
     type='DINO',
     num_queries=900,  # num_matching_queries
@@ -81,8 +80,7 @@ model = dict(
             match_costs=[
                 dict(type='FocalLossCost', weight=2.0),
                 dict(type='BBoxL1Cost', weight=5.0, box_format='xywh'),
-                dict(type='IoUCost', iou_mode='giou', weight=2.0)
-            ])),
+                dict(type='IoUCost', iou_mode='giou', weight=2.0)])),
     test_cfg=dict(max_per_img=300))  # 100 for DeformDETR
 # optimizer
 optim_wrapper = dict(
@@ -110,8 +108,7 @@ param_scheduler = [
         end=max_epochs,
         by_epoch=True,
         milestones=[20],
-        gamma=0.1)
-]
+        gamma=0.1)]
 
 # NOTE: `auto_scale_lr` is for automatically scaling LR,
 # USER SHOULD NOT CHANGE ITS VALUES.

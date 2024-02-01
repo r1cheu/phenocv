@@ -13,5 +13,4 @@ from .transformer import TwoWayTransformer
 
 __all__ = [
     'ImageEncoderViT', 'MaskDecoder', 'PromptEncoder', 'Sam', 'TinyViT',
-    'TwoWayTransformer'
-]
+    'TwoWayTransformer']

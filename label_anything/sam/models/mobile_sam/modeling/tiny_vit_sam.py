@@ -43,7 +43,7 @@ class Conv2d_BN(torch.nn.Sequential):
     @torch.no_grad()
     def fuse(self):
         c, bn = self._modules.values()
-        w = bn.weight / (bn.running_var + bn.eps)**0.5
+        w = bn.weight / (bn.running_var + bn.eps) ** 0.5
         w = c.weight * w[:, None, None, None]
         b = bn.bias - bn.running_mean * bn.weight / \
             (bn.running_var + bn.eps)**0.5
@@ -203,8 +203,7 @@ class ConvLayer(nn.Module):
                 conv_expand_ratio,
                 activation,
                 drop_path[i] if isinstance(drop_path, list) else drop_path,
-            ) for i in range(depth)
-        ])
+            ) for i in range(depth)])
 
         # patch merging layer
         if downsample is not None:
@@ -269,7 +268,7 @@ class Attention(torch.nn.Module):
         # (h, w)
         assert isinstance(resolution, tuple) and len(resolution) == 2
         self.num_heads = num_heads
-        self.scale = key_dim**-0.5
+        self.scale = key_dim ** -0.5
         self.key_dim = key_dim
         self.nh_kd = nh_kd = key_dim * num_heads
         self.d = int(attn_ratio * key_dim)
@@ -507,8 +506,7 @@ class BasicLayer(nn.Module):
                 if isinstance(drop_path, list) else drop_path,
                 local_conv_size=local_conv_size,
                 activation=activation,
-            ) for i in range(depth)
-        ])
+            ) for i in range(depth)])
 
         # patch merging layer
         if downsample is not None:
@@ -600,9 +598,9 @@ class TinyViT(nn.Module):
                 dim=embed_dims[i_layer],
                 input_resolution=(
                     patches_resolution[0] //
-                    (2**(i_layer - 1 if i_layer == 3 else i_layer)),
+                    (2 ** (i_layer - 1 if i_layer == 3 else i_layer)),
                     patches_resolution[1] //
-                    (2**(i_layer - 1 if i_layer == 3 else i_layer))),
+                    (2 ** (i_layer - 1 if i_layer == 3 else i_layer))),
                 #   input_resolution=(patches_resolution[0] // (2 ** i_layer),
                 #                     patches_resolution[1] // (2 ** i_layer)),
                 depth=depths[i_layer],
@@ -661,7 +659,7 @@ class TinyViT(nn.Module):
 
         # layers -> blocks (depth)
         depth = sum(self.depths)
-        lr_scales = [decay_rate**(depth - i - 1) for i in range(depth)]
+        lr_scales = [decay_rate ** (depth - i - 1) for i in range(depth)]
 
         # print("LR SCALES:", lr_scales)
 
@@ -734,8 +732,7 @@ _provided_checkpoints = {
     'tiny_vit_11m_224': 'tiny_vit_11m_22kto1k_distill',
     'tiny_vit_21m_224': 'tiny_vit_21m_22kto1k_distill',
     'tiny_vit_21m_384': 'tiny_vit_21m_22kto1k_384_distill',
-    'tiny_vit_21m_512': 'tiny_vit_21m_22kto1k_512_distill',
-}
+    'tiny_vit_21m_512': 'tiny_vit_21m_22kto1k_512_distill', }
 
 
 def register_tiny_vit_model(fn):

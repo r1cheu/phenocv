@@ -132,8 +132,7 @@ class Sam(nn.Module):
             outputs.append({
                 'masks': masks,
                 'iou_predictions': iou_predictions,
-                'low_res_logits': low_res_masks,
-            })
+                'low_res_logits': low_res_masks, })
         return outputs
 
     def postprocess_masks(

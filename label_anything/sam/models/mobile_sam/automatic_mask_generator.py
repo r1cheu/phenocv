@@ -105,8 +105,7 @@ class SamAutomaticMaskGenerator:
         assert output_mode in [
             'binary_mask',
             'uncompressed_rle',
-            'coco_rle',
-        ], f'Unknown output_mode {output_mode}.'
+            'coco_rle', ], f'Unknown output_mode {output_mode}.'
         if output_mode == 'coco_rle':
             from pycocotools import \
                 mask as mask_utils  # type: ignore # noqa: F401
@@ -167,12 +166,10 @@ class SamAutomaticMaskGenerator:
         # Encode masks
         if self.output_mode == 'coco_rle':
             mask_data['segmentations'] = [
-                coco_encode_rle(rle) for rle in mask_data['rles']
-            ]
+                coco_encode_rle(rle) for rle in mask_data['rles']]
         elif self.output_mode == 'binary_mask':
             mask_data['segmentations'] = [
-                rle_to_mask(rle) for rle in mask_data['rles']
-            ]
+                rle_to_mask(rle) for rle in mask_data['rles']]
         else:
             mask_data['segmentations'] = mask_data['rles']
 
@@ -192,8 +189,7 @@ class SamAutomaticMaskGenerator:
                 'stability_score':
                 mask_data['stability_score'][idx].item(),
                 'crop_box':
-                box_xyxy_to_xywh(mask_data['crop_boxes'][idx]).tolist(),
-            }
+                box_xyxy_to_xywh(mask_data['crop_boxes'][idx]).tolist(), }
             curr_anns.append(ann)
 
         return curr_anns
@@ -266,8 +262,8 @@ class SamAutomaticMaskGenerator:
         # Return to the original image frame
         data['boxes'] = uncrop_boxes_xyxy(data['boxes'], crop_box)
         data['points'] = uncrop_points(data['points'], crop_box)
-        data['crop_boxes'] = torch.tensor(
-            [crop_box for _ in range(len(data['rles']))])
+        data['crop_boxes'] = torch.tensor([
+            crop_box for _ in range(len(data['rles']))])
 
         return data
 

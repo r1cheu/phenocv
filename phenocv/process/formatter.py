@@ -1,8 +1,9 @@
 import re
-from typing import Dict, Any
 from abc import ABCMeta, abstractmethod
+from typing import Any, Dict
 
 import pandas as pd
+
 from .base import Processor
 
 
@@ -27,10 +28,11 @@ class Formatter(Processor, metaclass=ABCMeta):
 
 class PanicleFormatter(Formatter):
 
-    def __init__(self,
-                 id_pattern: str,
-                 date_pattern: str = r'\d{8}',
-                 ):
+    def __init__(
+        self,
+        id_pattern: str,
+        date_pattern: str = r'\d{8}',
+    ):
         super().__init__()
         self.id_pattern = re.compile(id_pattern)
         self.date_pattern = re.compile(date_pattern)

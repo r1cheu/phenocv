@@ -1,15 +1,13 @@
 _base_ = [
     '../_base_/models/cascade-rcnn_r50_fpn.py',
     '../_base_/datasets/panicle_detection.py',
-    '../_base_/schedules/schedule_2x.py', '../_base_/custom_runtime.py'
-]
+    '../_base_/schedules/schedule_2x.py', '../_base_/custom_runtime.py']
 
 model = dict(
     roi_head=dict(bbox_head=[
         dict(type='Shared2FCBBoxHead', num_classes=1),
         dict(type='Shared2FCBBoxHead', num_classes=1),
-        dict(type='Shared2FCBBoxHead', num_classes=1)
-    ]),
+        dict(type='Shared2FCBBoxHead', num_classes=1)]),
     test_cfg=dict(
         rcnn=dict(
             score_thr=0.05,

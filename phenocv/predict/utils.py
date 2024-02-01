@@ -144,9 +144,8 @@ def draw_bounding_boxes(
         return image
 
     if labels is None:
-        labels: Union[List[str],
-                      List[None]] = [None
-                                     ] * num_boxes  # type: ignore[no-redef]
+        labels: Union[List[str], List[None]] = [
+            None] * num_boxes  # type: ignore[no-redef]
     elif len(labels) != num_boxes:
         raise ValueError(
             f'Number of boxes ({num_boxes}) and labels ({len(labels)})'

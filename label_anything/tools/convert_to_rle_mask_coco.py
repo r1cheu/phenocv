@@ -105,8 +105,7 @@ def format_to_coco(args):
                 'id':
                 len(coco_format['categories']),
                 'name':
-                category
-            })
+                category})
 
     index_cnt = 0
     # 遍历每个标注
@@ -156,8 +155,7 @@ def format_to_coco(args):
                     'id': image_id,
                     'file_name': image_json_name,
                     'width': width_from_json,
-                    'height': height_from_json
-                })
+                    'height': height_from_json})
 
                 # 检查类别是否已经添加到categories变量中，
                 # 如果没有，将其添加到categories变量
@@ -167,8 +165,7 @@ def format_to_coco(args):
                         'id':
                         len(coco_format['categories']),
                         'name':
-                        category
-                    })
+                        category})
 
                 # 添加标注信息到coco格式
                 coco_format['annotations'].append({
@@ -178,8 +175,7 @@ def format_to_coco(args):
                     image_id,
                     'category_id': [
                         d['id'] for d in coco_format['categories']
-                        if d['name'] == category
-                    ][0],
+                        if d['name'] == category][0],
                     'segmentation':
                     rle,
                     'bbox':
@@ -228,8 +224,7 @@ def move_to_cfg(args, classes_list):
         'train_ann_file': train_ann_file,
         'val_ann_file': train_ann_file,
         'train_data_prefix': train_data_prefix,
-        'val_data_prefix': train_data_prefix
-    }
+        'val_data_prefix': train_data_prefix}
     current_dir = os.getcwd()
     env = jinja2.Environment(loader=jinja2.FileSystemLoader(current_dir))
     temp = env.get_template(config_path)

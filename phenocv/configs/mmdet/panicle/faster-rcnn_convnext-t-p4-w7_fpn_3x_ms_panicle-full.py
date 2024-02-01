@@ -1,8 +1,7 @@
 _base_ = [
     '../_base_/models/faster-rcnn_r50_fpn.py',
     '../_base_/datasets/panicle_detection.py',
-    '../_base_/schedules/schedule_2x.py', '../_base_/custom_runtime.py'
-]
+    '../_base_/schedules/schedule_2x.py', '../_base_/custom_runtime.py']
 
 custom_imports = dict(
     imports=['mmcls.models', 'mmyolo.datasets'], allow_failed_imports=False)
@@ -33,8 +32,7 @@ env_cfg = dict(cudnn_benchmark=False, )
 albu_train_transforms = [
     dict(type='Blur', p=0.01),
     dict(type='MedianBlur', p=0.01),
-    dict(type='CLAHE', p=0.01)
-]
+    dict(type='CLAHE', p=0.01)]
 
 train_pipeline = [
     dict(type='LoadImageFromFile', backend_args={{_base_.backend_args}}),
@@ -52,8 +50,7 @@ train_pipeline = [
                 scales=[(480, 1333), (512, 1333), (544, 1333), (576, 1333),
                         (608, 1333), (640, 1333), (672, 1333), (704, 1333),
                         (736, 1333), (768, 1333), (800, 1333)],
-                keep_ratio=True)
-        ],
+                keep_ratio=True)],
                     [
                         dict(
                             type='RandomChoiceResize',
@@ -70,8 +67,7 @@ train_pipeline = [
                                     (576, 1333), (608, 1333), (640, 1333),
                                     (672, 1333), (704, 1333), (736, 1333),
                                     (768, 1333), (800, 1333)],
-                            keep_ratio=True)
-                    ]]),
+                            keep_ratio=True)]]),
     dict(
         type='Albu',
         transforms=albu_train_transforms,
@@ -81,11 +77,9 @@ train_pipeline = [
             label_fields=['gt_bboxes_labels', 'gt_ignore_flags']),
         keymap={
             'img': 'image',
-            'gt_bboxes': 'bboxes'
-        }),
+            'gt_bboxes': 'bboxes'}),
     dict(type='mmyolo.YOLOv5HSVRandomAug'),
-    dict(type='PackDetInputs')
-]
+    dict(type='PackDetInputs')]
 train_dataloader = dict(dataset=dict(pipeline=train_pipeline))
 max_epochs = 36
 train_cfg = dict(max_epochs=max_epochs)
@@ -101,8 +95,7 @@ param_scheduler = [
         end=max_epochs,
         by_epoch=True,
         milestones=[27, 33],
-        gamma=0.1)
-]
+        gamma=0.1)]
 
 # Enable automatic-mixed-precision training with AmpOptimWrapper.
 optim_wrapper = dict(
@@ -111,8 +104,7 @@ optim_wrapper = dict(
     paramwise_cfg={
         'decay_rate': 0.95,
         'decay_type': 'layer_wise',
-        'num_layers': 6
-    },
+        'num_layers': 6},
     optimizer=dict(
         _delete_=True,
         type='AdamW',

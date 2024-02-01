@@ -24,8 +24,7 @@ vis_backends = [
     dict(
         type='WandbVisBackend',
         init_kwargs=dict(project='PanicleDet'),
-        define_metric_cfg={'coco/bbox_mAP': 'max'})
-]
+        define_metric_cfg={'coco/bbox_mAP': 'max'})]
 visualizer = dict(
     type='DetLocalVisualizer', vis_backends=vis_backends, name='visualizer')
 log_processor = dict(type='LogProcessor', window_size=50, by_epoch=True)

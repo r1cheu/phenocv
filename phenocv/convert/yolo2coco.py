@@ -10,6 +10,7 @@ import cv2
 from tqdm import tqdm
 
 from phenocv.utils import check_img_input
+
 from .base import YOLOto
 
 
@@ -32,8 +33,7 @@ class YOLOtoCOCO(YOLOto):
             'year': int(self._cur_date.split('/')[0]),
             'version': '1.0',
             'description': 'For object detection',
-            'date_created': self._cur_date,
-        }
+            'date_created': self._cur_date, }
 
     def _get_category(self, classes_path):
         class_list = self.read_txt(classes_path)
@@ -42,8 +42,7 @@ class YOLOtoCOCO(YOLOto):
             categories.append({
                 'supercategory': category,
                 'id': i,
-                'name': category,
-            })
+                'name': category, })
         return categories
 
     def __call__(self):
@@ -83,8 +82,7 @@ class YOLOtoCOCO(YOLOto):
             'images': images,
             'type': self._type,
             'annotations': annotations,
-            'categories': self.categories,
-        }
+            'categories': self.categories, }
         return json_data
 
     def get_image_info(self, img_path, img_id, save_img_dir):
@@ -110,8 +108,7 @@ class YOLOtoCOCO(YOLOto):
             'file_name': new_img_name,
             'id': img_id,
             'height': height,
-            'width': width,
-        }
+            'width': width, }
         return image_info
 
     def get_annotation(self, label_path: Path, img_id, height, width):
@@ -145,8 +142,7 @@ class YOLOtoCOCO(YOLOto):
                 'image_id': img_id,
                 'bbox': [0, 0, 0, 0],
                 'category_id': -1,
-                'id': self._annotation_id,
-            }]
+                'id': self._annotation_id, }]
             self._annotation_id += 1
             return annotation
 
@@ -169,7 +165,6 @@ class YOLOtoCOCO(YOLOto):
                 'image_id': img_id,
                 'bbox': bbox,
                 'category_id': int(category_id) + 1,
-                'id': self._annotation_id,
-            })
+                'id': self._annotation_id, })
             self._annotation_id += 1
         return annotation

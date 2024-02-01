@@ -107,8 +107,7 @@ class MMDetection(LabelStudioMLBase):
         if 'RectangleLabels' in self.parsed_label_config and self.out_bbox:
 
             self.parsed_label_config_RectangleLabels = {
-                'RectangleLabels': self.parsed_label_config['RectangleLabels']
-            }
+                'RectangleLabels': self.parsed_label_config['RectangleLabels']}
             self.from_name_RectangleLabels, self.to_name_RectangleLabels, self.value_RectangleLabels, self.labels_in_config_RectangleLabels = get_single_tag_keys(  # noqa E501
                 self.parsed_label_config_RectangleLabels, 'RectangleLabels',
                 'Image')
@@ -116,24 +115,21 @@ class MMDetection(LabelStudioMLBase):
         if 'BrushLabels' in self.parsed_label_config:
 
             self.parsed_label_config_BrushLabels = {
-                'BrushLabels': self.parsed_label_config['BrushLabels']
-            }
+                'BrushLabels': self.parsed_label_config['BrushLabels']}
             self.from_name, self.to_name, self.value, self.labels_in_config = get_single_tag_keys(  # noqa E501
                 self.parsed_label_config_BrushLabels, 'BrushLabels', 'Image')
 
         if 'BrushLabels' in self.parsed_label_config:
 
             self.parsed_label_config_BrushLabels = {
-                'BrushLabels': self.parsed_label_config['BrushLabels']
-            }
+                'BrushLabels': self.parsed_label_config['BrushLabels']}
             self.from_name_BrushLabels, self.to_name_BrushLabels, self.value_BrushLabels, self.labels_in_config_BrushLabels = get_single_tag_keys(  # noqa
                 self.parsed_label_config_BrushLabels, 'BrushLabels', 'Image')
 
         if 'PolygonLabels' in self.parsed_label_config and self.out_poly:
 
             self.parsed_label_config_PolygonLabels = {
-                'PolygonLabels': self.parsed_label_config['PolygonLabels']
-            }
+                'PolygonLabels': self.parsed_label_config['PolygonLabels']}
             self.from_name_PolygonLabels, self.to_name_PolygonLabels, self.value_PolygonLabels, self.labels_in_config_PolygonLabels = get_single_tag_keys(  # noqa
                 self.parsed_label_config_PolygonLabels, 'PolygonLabels',
                 'Image')
@@ -167,8 +163,7 @@ class MMDetection(LabelStudioMLBase):
                     ClientMethod='get_object',
                     Params={
                         'Bucket': bucket_name,
-                        'Key': key
-                    })
+                        'Key': key})
             except ClientError as exc:
                 logger.warning(
                     f'Can\'t generate presigned URL for {image_url}. Reason: {exc}'  # noqa E501
@@ -261,8 +256,7 @@ class MMDetection(LabelStudioMLBase):
                     'x': float(x) / original_width * 100,
                     'y': float(y) / original_height * 100,
                     'width': float(w) / original_width * 100,
-                    'height': float(h) / original_height * 100,
-                },
+                    'height': float(h) / original_height * 100, },
                 'id':
                 ''.join(random.SystemRandom().choices(
                     string.ascii_uppercase + string.ascii_lowercase +
@@ -279,8 +273,7 @@ class MMDetection(LabelStudioMLBase):
                     x, y = point[0]
                     points.append([
                         float(x) / original_width * 100,
-                        float(y) / original_height * 100
-                    ])
+                        float(y) / original_height * 100])
                 points_list.extend(points)
             filterd_points = NearNeighborRemover(
                 distance_threshold=0.4
@@ -302,8 +295,7 @@ class MMDetection(LabelStudioMLBase):
                 # "image_rotation": 0,
                 'value': {
                     'points': filterd_points,
-                    'polygonlabels': [output_label],
-                },
+                    'polygonlabels': [output_label], },
                 'type':
                 'polygonlabels',
                 'id':
@@ -312,8 +304,7 @@ class MMDetection(LabelStudioMLBase):
                     string.digits,
                     k=6)),  # creates a random ID for your label every time
                 'readonly':
-                False,
-            })
+                False, })
 
         if self.out_mask:
             mask = mask * 255
@@ -330,8 +321,7 @@ class MMDetection(LabelStudioMLBase):
                 'value': {
                     'format': 'rle',
                     'rle': rle,
-                    'brushlabels': [output_label],
-                },
+                    'brushlabels': [output_label], },
                 'type':
                 'brushlabels',
                 'id':
@@ -340,8 +330,7 @@ class MMDetection(LabelStudioMLBase):
                     string.digits,
                     k=6)),  # creates a random ID for your label every time
                 'readonly':
-                False,
-            })
+                False, })
 
         return [{'result': results}]
 

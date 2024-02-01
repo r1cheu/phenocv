@@ -1,8 +1,7 @@
 _base_ = [
     '../_base_/models/cascade-rcnn_r50_fpn.py',
     '../_base_/datasets/panicle_detection.py',
-    '../_base_/schedules/schedule_2x.py', '../_base_/custom_runtime.py'
-]
+    '../_base_/schedules/schedule_2x.py', '../_base_/custom_runtime.py']
 
 custom_imports = dict(
     imports=['mmcls.models', 'mmyolo.datasets'], allow_failed_imports=False)
@@ -78,8 +77,7 @@ model = dict(
             norm_cfg=dict(type='SyncBN', requires_grad=True),
             loss_cls=dict(
                 type='CrossEntropyLoss', use_sigmoid=False, loss_weight=1.0),
-            loss_bbox=dict(type='GIoULoss', loss_weight=10.0))
-    ]))
+            loss_bbox=dict(type='GIoULoss', loss_weight=10.0))]))
 
 env_cfg = dict(cudnn_benchmark=True, )
 
@@ -97,8 +95,7 @@ param_scheduler = [
         end=max_epochs,
         by_epoch=True,
         milestones=[27, 33],
-        gamma=0.1)
-]
+        gamma=0.1)]
 
 # Enable automatic-mixed-precision training with AmpOptimWrapper.
 optim_wrapper = dict(
@@ -107,8 +104,7 @@ optim_wrapper = dict(
     paramwise_cfg={
         'decay_rate': 0.7,
         'decay_type': 'layer_wise',
-        'num_layers': 6
-    },
+        'num_layers': 6},
     optimizer=dict(
         _delete_=True,
         type='AdamW',

@@ -45,8 +45,7 @@ class PromptEncoder(nn.Module):
         self.num_point_embeddings: int = 4  # pos/neg point + 2 box corners
         point_embeddings = [
             nn.Embedding(1, embed_dim)
-            for i in range(self.num_point_embeddings)
-        ]
+            for i in range(self.num_point_embeddings)]
         self.point_embeddings = nn.ModuleList(point_embeddings)
         self.not_a_point_embed = nn.Embedding(1, embed_dim)
 

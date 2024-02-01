@@ -12,7 +12,7 @@ from sahi.predict import get_sliced_prediction
 from torch import Tensor
 from ultralytics import YOLO
 
-from phenocv.utils import read_image, Results
+from phenocv.utils import Results, read_image
 
 
 class YoloPredictor(metaclass=ABCMeta):
@@ -36,11 +36,12 @@ class YoloPredictor(metaclass=ABCMeta):
         _get_bbox: Get the bounding boxes from the inference result.
     """
 
-    def __init__(self,
-                 model_weight: str,
-                 classes: int = 0,
-                 device: Union[int, Tuple[int]] = 0,
-                 ) -> None:
+    def __init__(
+        self,
+        model_weight: str,
+        classes: int = 0,
+        device: Union[int, Tuple[int]] = 0,
+    ) -> None:
 
         self.classes = classes
         self._results = None
@@ -59,8 +60,7 @@ class YoloPredictor(metaclass=ABCMeta):
             conf (float): The confidence threshold for object detection.
             iou (float): The IoU threshold for non-maximum suppression.
         """
-        results = self.model.predict(source, conf=conf, iou=iou,
-                                     verbose=False)
+        results = self.model.predict(source, conf=conf, iou=iou, verbose=False)
 
         for _result in results:
             _result = _result.cpu().numpy()
@@ -119,17 +119,18 @@ class YoloPredictor(metaclass=ABCMeta):
 
 class YoloSahiPredictor:
 
-    def __init__(self,
-                 model_type,
-                 model_weight,
-                 device: int | Tuple[int] = 0,
-                 conf=0.25,
-                 iou=0.7,
-                 slice_height=1024,
-                 slice_width=1024,
-                 overlap_height_ratio=0.25,
-                 overlap_width_ratio=0.25,
-                 ) -> None:
+    def __init__(
+        self,
+        model_type,
+        model_weight,
+        device: int | Tuple[int] = 0,
+        conf=0.25,
+        iou=0.7,
+        slice_height=1024,
+        slice_width=1024,
+        overlap_height_ratio=0.25,
+        overlap_width_ratio=0.25,
+    ) -> None:
 
         self._results = None
         self.conf = conf
@@ -150,8 +151,7 @@ class YoloSahiPredictor:
 
         self.device = device
 
-    def _sahi_infer(self,
-                    source: str | Path | Results):
+    def _sahi_infer(self, source: str | Path | Results):
         """Perform Sahi inference on the given source image."""
         if isinstance(source, str):
             orig_img = read_image(source)
@@ -164,18 +164,20 @@ class YoloSahiPredictor:
 
         names = self.model.model.names
 
-        results = get_sliced_prediction(orig_img,
-                                        self.model,
-                                        self.slice_height,
-                                        self.slice_width,
-                                        self.overlap_height_ratio,
-                                        self.overlap_width_ratio,
-                                        postprocess_match_threshold=self.iou,
-                                        verbose=0)
+        results = get_sliced_prediction(
+            orig_img,
+            self.model,
+            self.slice_height,
+            self.slice_width,
+            self.overlap_height_ratio,
+            self.overlap_width_ratio,
+            postprocess_match_threshold=self.iou,
+            verbose=0)
 
         # Convert results to YOLO format and stack them
-        yolo_result = [self._sahi_to_yolo(result) for result in
-                       results.object_prediction_list]
+        yolo_result = [
+            self._sahi_to_yolo(result)
+            for result in results.object_prediction_list]
 
         if len(yolo_result) == 0:
             boxes = None
@@ -184,8 +186,7 @@ class YoloSahiPredictor:
 
         return Results(orig_img=orig_img, path=path, names=names, boxes=boxes)
 
-    def __call__(self,
-                 source: str | Results):
+    def __call__(self, source: str | Results):
         """Perform inference on the given source image.
 
         Args:

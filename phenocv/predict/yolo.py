@@ -1,6 +1,6 @@
 from collections import namedtuple
 from pathlib import Path
-from typing import Tuple, Dict
+from typing import Dict, Tuple
 
 import numpy as np
 import torch
@@ -10,6 +10,7 @@ from sklearn.cluster import DBSCAN
 from torch import Tensor
 
 from phenocv.utils import Results, read_image
+
 from .base_yolo import YoloPredictor, YoloSahiPredictor
 from .utils import compute_dist, generate_label, make_label_box_map, mask2rbox
 
@@ -194,7 +195,6 @@ class YoloStubbleUav(YoloPredictor):
 
 
 class YoloStubbleDrone(YoloPredictor):
-
     """YOLOStubbleDrone is a class that performs inference using YOLO model for
     detecting stubble from image taken by drones.
 
@@ -330,34 +330,35 @@ class YoloSamObb(YoloPredictor):
 
 class YoloSahiPanicleUavPredictor(YoloSahiPredictor):
 
-    def _sahi_infer(self,
-                    source):
+    def _sahi_infer(self, source):
         """Perform Sahi inference on the given source image."""
 
         # Prepare the image, original image, path, old box and names based
         # on the type of source
         if isinstance(source, Results):
-            img, orig_img, path, old_box, names = self._prepare_source_from_results(
+            img, orig_img, path, old_box, names = self._prepare_from_results(
                 source)
         elif isinstance(source, (str, Path)):
-            img, orig_img, path, old_box, names = self._prepare_source_from_path(
+            img, orig_img, path, old_box, names = self._prepare_from_path(
                 source)
         else:
             raise TypeError('source must be a Results, str or Path object.')
 
         # Get sliced prediction
-        results = get_sliced_prediction(img,
-                                        self.model,
-                                        self.slice_height,
-                                        self.slice_width,
-                                        self.overlap_height_ratio,
-                                        self.overlap_width_ratio,
-                                        postprocess_match_threshold=self.iou,
-                                        verbose=0)
+        results = get_sliced_prediction(
+            img,
+            self.model,
+            self.slice_height,
+            self.slice_width,
+            self.overlap_height_ratio,
+            self.overlap_width_ratio,
+            postprocess_match_threshold=self.iou,
+            verbose=0)
 
         # Convert results to YOLO format and stack them
-        yolo_result = [self._sahi_to_yolo(result) for result in
-                       results.object_prediction_list]
+        yolo_result = [
+            self._sahi_to_yolo(result)
+            for result in results.object_prediction_list]
 
         if len(yolo_result) == 0:
             boxes = None
@@ -370,14 +371,14 @@ class YoloSahiPanicleUavPredictor(YoloSahiPredictor):
 
         return Results(orig_img=orig_img, path=path, names=names, boxes=boxes)
 
-    def _prepare_source_from_results(self, source):
+    def _prepare_from_results(self, source):
         img = source.crop_img()[:, :, ::-1]
         orig_img = source.orig_img
         path = source.path
         old_box, names = self.update_old_box(source)
         return img, orig_img, path, old_box, names
 
-    def _prepare_source_from_path(self, source):
+    def _prepare_from_path(self, source):
         img = read_image(source)
         orig_img = img
         path = str(source)
@@ -416,8 +417,9 @@ class YoloSahiPanicleUavPredictor(YoloSahiPredictor):
         # keep the order of the new_names, add the category_id in old_names
         # to it.
         new_names_rev = {v: k for k, v in new_names.items()}
-        final_dict = {new_names_rev[name]: name for name in names if
-                      name in new_names_rev}
+        final_dict = {
+            new_names_rev[name]: name
+            for name in names if name in new_names_rev}
 
         # if the old_names is not in the new_names, add it to the final_dict
         for v in old_names.values():

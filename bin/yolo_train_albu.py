@@ -28,8 +28,7 @@ def callback_custom_albumentations(trainer: BaseTrainer):
             p=0.0,
             quality_lower=75,
             quality_upper=100,
-            compression_type=0),
-    ]
+            compression_type=0), ]
 
     transform = A.Compose(
         T,

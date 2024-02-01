@@ -1,8 +1,7 @@
 _base_ = [
     '../_base_/models/faster-rcnn_r50_fpn.py',
     '../_base_/datasets/panicle_detection.py',
-    '../_base_/schedules/schedule_2x.py', '../_base_/custom_runtime.py'
-]
+    '../_base_/schedules/schedule_2x.py', '../_base_/custom_runtime.py']
 
 # `lr` and `weight_decay` have been searched to be optimal.
 # 我们还需要更改 head 中的 num_classes 以匹配数据集中的类别数

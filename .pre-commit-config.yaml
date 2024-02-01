@@ -9,6 +9,22 @@ ci:
 
 # Define repos to run
 repos:
+  - repo: https://github.com/PyCQA/flake8
+    rev: 5.0.4
+    hooks:
+      - id: flake8
+
+  - repo: https://github.com/PyCQA/isort
+    rev: 5.11.5
+    hooks:
+      - id: isort
+
+  - repo: https://github.com/pre-commit/mirrors-yapf
+    rev: v0.32.0
+    hooks:
+      - id: yapf
+        additional_dependencies: [toml]
+
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v4.5.0
     hooks:
@@ -50,7 +66,6 @@ repos:
     rev: v2.2.6
     hooks:
       - id: codespell
-        exclude: "docs/de|docs/fr|docs/pt|docs/es|docs/mkdocs_de.yml"
         args:
           - --ignore-words-list=crate,nd,ned,strack,dota,ane,segway,fo,gool,winn,commend,bloc,nam,afterall
 

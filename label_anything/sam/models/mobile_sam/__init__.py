@@ -12,5 +12,4 @@ from .predictor import SamPredictor
 __all__ = [
     'SamAutomaticMaskGenerator', 'build_sam', 'build_sam_vit_b',
     'build_sam_vit_h', 'build_sam_vit_l', 'build_sam_vit_t',
-    'sam_model_registry', 'SamPredictor'
-]
+    'sam_model_registry', 'SamPredictor']

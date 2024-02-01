@@ -132,8 +132,7 @@ def mask_to_rle_pytorch(tensor: torch.Tensor) -> List[Dict[str, Any]]:
             torch.tensor([0], dtype=cur_idxs.dtype, device=cur_idxs.device),
             cur_idxs + 1,
             torch.tensor([h * w], dtype=cur_idxs.dtype,
-                         device=cur_idxs.device),
-        ])
+                         device=cur_idxs.device), ])
         btw_idxs = cur_idxs[1:] - cur_idxs[:-1]
         counts = [] if tensor[i, 0] == 0 else [0]
         counts.extend(btw_idxs.detach().cpu().tolist())
@@ -190,7 +189,7 @@ def build_all_layer_point_grids(n_per_side: int, n_layers: int,
     """Generates point grids for all crop layers."""
     points_by_layer = []
     for i in range(n_layers + 1):
-        n_points = int(n_per_side / (scale_per_layer**i))
+        n_points = int(n_per_side / (scale_per_layer ** i))
         points_by_layer.append(build_point_grid(n_points))
     return points_by_layer
 
@@ -214,18 +213,16 @@ def generate_crop_boxes(
         return int(math.ceil((overlap * (n_crops - 1) + orig_len) / n_crops))
 
     for i_layer in range(n_layers):
-        n_crops_per_side = 2**(i_layer + 1)
+        n_crops_per_side = 2 ** (i_layer + 1)
         overlap = int(overlap_ratio * short_side * (2 / n_crops_per_side))
 
         crop_w = crop_len(im_w, n_crops_per_side, overlap)
         crop_h = crop_len(im_h, n_crops_per_side, overlap)
 
         crop_box_x0 = [
-            int((crop_w - overlap) * i) for i in range(n_crops_per_side)
-        ]
+            int((crop_w - overlap) * i) for i in range(n_crops_per_side)]
         crop_box_y0 = [
-            int((crop_h - overlap) * i) for i in range(n_crops_per_side)
-        ]
+            int((crop_h - overlap) * i) for i in range(n_crops_per_side)]
 
         # Crops in XYWH format
         for x0, y0 in product(crop_box_x0, crop_box_y0):

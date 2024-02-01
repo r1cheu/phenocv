@@ -1,5 +1,3 @@
-from .traits import (
-                     PanicleAnalyzer)
+from .traits import PanicleAnalyzer
 
-__all__ = [
-           'PanicleAnalyzer']
+__all__ = ['PanicleAnalyzer']

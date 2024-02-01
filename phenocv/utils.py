@@ -6,6 +6,7 @@ import subprocess
 import sys
 import time
 import warnings
+from importlib import resources
 from pathlib import Path
 from typing import Union
 
@@ -17,16 +18,14 @@ import torch
 from ultralytics.engine.results import Results as _Results
 
 
-def prepare_df(pred_data: Union[str, Path, pd.DataFrame]) -> (
-        pd.DataFrame):
+def prepare_df(pred_data: Union[str, Path, pd.DataFrame]) -> (pd.DataFrame):
     if isinstance(pred_data, str):
         pred_data = Path(pred_data)
     if isinstance(pred_data, Path):
         pred_data = pd.read_csv(pred_data)
     if not isinstance(pred_data, pd.DataFrame):
-        raise TypeError(
-            f'pred_data should be str, Path or DataFrame, but got '
-            f' {type(pred_data)}')
+        raise TypeError(f'pred_data should be str, Path or DataFrame, but got '
+                        f' {type(pred_data)}')
     if 'date' in pred_data.columns:
         pred_data['date'] = pd.to_datetime(pred_data['date'])
 
@@ -46,7 +45,7 @@ def scandir(dir_path, suffix=None, recursive=False, case_sensitive=True):
             suffix. Defaults to True.
 
     Returns:
-        A generator for all the interested files with relative paths.
+        A list of all the interested files with relative paths.
     """
     if isinstance(dir_path, (str, Path)):
         dir_path = str(dir_path)
@@ -61,20 +60,28 @@ def scandir(dir_path, suffix=None, recursive=False, case_sensitive=True):
             item.lower() for item in suffix)
 
     root = dir_path
+    found_files = False
 
     def _scandir(dir_path, suffix, recursive, case_sensitive):
+        nonlocal found_files
         for entry in os.scandir(dir_path):
             if not entry.name.startswith('.') and entry.is_file():
                 rel_path = osp.relpath(entry.path, root)
                 _rel_path = rel_path if case_sensitive else rel_path.lower()
                 if suffix is None or _rel_path.endswith(suffix):
+                    found_files = True
                     yield rel_path
             elif recursive and os.path.isdir(entry.path):
                 # scan recursively if entry.path is a directory
                 yield from _scandir(entry.path, suffix, recursive,
                                     case_sensitive)
 
-    return _scandir(dir_path, suffix, recursive, case_sensitive)
+    files = sorted(list(_scandir(dir_path, suffix, recursive, case_sensitive)))
+    if not found_files:
+        raise FileNotFoundError(f'No files with suffix {suffix} found in the '
+                                f'directory {dir_path}. Please check the '
+                                f'suffix and directory.')
+    return files
 
 
 def match_yolo_annotations(ann_dir, img_dir, img_suffix='.jpg'):
@@ -190,8 +197,7 @@ def check_path(path):
         raise TypeError('Input must be a string, Path object or a 3D array.')
 
 
-def read_image(img: Union[str, Path],  order='BGR'):
-
+def read_image(img: Union[str, Path], order='BGR'):
     """Read an image from file or a numpy array.
 
     Args:
@@ -253,13 +259,15 @@ class Results(_Results):
     @classmethod
     def from_yolo(cls, results: _Results):
         """Convert original ultralytics Results to custom."""
-        return cls(orig_img=results.orig_img,
-                   path=results.path,
-                   names=results.names,
-                   boxes=results.boxes.data,
-                   masks=results.masks,
-                   probs=results.probs,
-                   keypoints=results.keypoints, )
+        return cls(
+            orig_img=results.orig_img,
+            path=results.path,
+            names=results.names,
+            boxes=results.boxes.data,
+            masks=results.masks,
+            probs=results.probs,
+            keypoints=results.keypoints,
+        )
 
     @property
     def num_bbox(self):
@@ -273,16 +281,49 @@ class Results(_Results):
 
 def check_latest_pypi_version(package_name="phenocv"):
     """
-    Returns the latest version of a PyPI package without downloading or installing it.
+    Returns the latest version of a PyPI package without downloading or
+    installing it.
 
     Parameters:
-        package_name (str): The name of the package to find the latest version for.
+        package_name (str): The name of the package to find the latest
+        version for.
 
     Returns:
         (str): The latest version of the package.
     """
     with contextlib.suppress(Exception):
-        requests.packages.urllib3.disable_warnings()  # Disable the InsecureRequestWarning
-        response = requests.get(f"https://pypi.org/pypi/{package_name}/json", timeout=3)
+        requests.packages.urllib3.disable_warnings(
+        )  # Disable the InsecureRequestWarning
+        response = requests.get(
+            f"https://pypi.org/pypi/"
+            f"{package_name}/json", timeout=3)
         if response.status_code == 200:
             return response.json()["info"]["version"]
+
+
+def get_config_path(config_name: Union[str, Path]):
+
+    config_name = Path(config_name) if isinstance(config_name,
+                                                  str) else (config_name)
+
+    def check_config(path, config):
+        path = Path(str(resources.files('phenocv'))) / path
+        config = path / config
+
+        if not config.exists():
+            raise FileNotFoundError(f'{config} does not exist.')
+
+        return config
+
+    if config_name.exists():
+        return config_name
+
+    if config_name.suffix == '.yaml':
+        return check_config('configs/yolo', config_name)
+
+    elif config_name.suffix == '.cfg':
+        return check_config('configs/', config_name)
+
+    else:
+        raise ValueError('Wrong config, config should end with .yaml or '
+                         f'.cfg, but got {config_name}')

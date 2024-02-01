@@ -86,6 +86,5 @@ def inverse_logistic(K, x0, r, y):
 
 
 def remove_smaller(arr):
-    mask = np.r_[True, (arr[1:-1] >= arr[:-2]) | (
-            arr[1:-1] >= arr[2:]), True]
+    mask = np.r_[True, (arr[1:-1] >= arr[:-2]) | (arr[1:-1] >= arr[2:]), True]
     return mask

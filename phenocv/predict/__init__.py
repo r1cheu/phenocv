@@ -5,5 +5,4 @@ from .yolo import (YoloSahiPanicleUavPredictor, YoloSamObb, YoloStubbleDrone,
 __all__ = [
     'YoloStubbleUav', 'YoloStubbleDrone', 'YoloTillerDrone', 'YoloSamObb',
     'YoloPanicleUav', 'YoloPredictor', 'YoloSahiPredictor',
-    "YoloSahiPanicleUavPredictor"
-]
+    "YoloSahiPanicleUavPredictor"]

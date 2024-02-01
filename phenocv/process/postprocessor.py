@@ -3,8 +3,9 @@ from typing import Union
 import numpy as np
 import pandas as pd
 
-from .base import Processor
 from phenocv.utils import prepare_df
+
+from .base import Processor
 
 
 class PaniclePostprocessor(Processor):
@@ -17,9 +18,7 @@ class PaniclePostprocessor(Processor):
         seeding_date (Union[str, int]): The seeding date.
     """
 
-    def __init__(self,
-                 start_date: Union[str, int],
-                 end_date: Union[str, int],
+    def __init__(self, start_date: Union[str, int], end_date: Union[str, int],
                  seeding_date: Union[str, int]):
         super().__init__()
 
@@ -43,9 +42,8 @@ class PaniclePostprocessor(Processor):
             pd.DataFrame: The interpolated data.
         """
         # create a dataframe with all the dates, handle the missing values
-        full_date = pd.Series(pd.date_range(self._start_date,
-                                            self._end_date),
-                              name='date')
+        full_date = pd.Series(
+            pd.date_range(self._start_date, self._end_date), name='date')
 
         _result = pd.merge(full_date, data, how='left', on='date')
 
@@ -55,7 +53,7 @@ class PaniclePostprocessor(Processor):
         _result['value'] = _result['value'].interpolate(method='linear')
         _result['value'] = _result['value'].bfill()  # fill the first value
 
-        _result['id'] = _result['id'].bfill() # convert to int
+        _result['id'] = _result['id'].bfill()  # convert to int
         _result['id'] = _result['id'].ffill()
 
         _result = _result[['date', 'days', 'id', 'value', 'interpolate']]

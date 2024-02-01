@@ -102,9 +102,9 @@ class SamOnnxModel(nn.Module):
         # Determine if we should return the multiclick mask or not
         # from the number of points.
         # The reweighting is used to avoid control flow.
-        score_reweight = torch.tensor([
-            [1000] + [0] * (self.model.mask_decoder.num_mask_tokens - 1)
-        ]).to(iou_preds.device)
+        score_reweight = torch.tensor(
+            [[1000] + [0] * (self.model.mask_decoder.num_mask_tokens - 1)
+             ]).to(iou_preds.device)
         score = iou_preds + (num_points - 2.5) * score_reweight
         best_idx = torch.argmax(score, dim=1)
         masks = masks[torch.arange(masks.shape[0]),

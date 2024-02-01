@@ -2,10 +2,10 @@ from typing import Tuple, Union
 
 import catalogue
 from confection import registry
-from phenocv.process import (PanicleUavPreprocessor, PanicleFormatter,
-                             PaniclePostprocessor, PanicleExtractor)
-from phenocv.predict import YoloSahiPanicleUavPredictor
 
+from phenocv.predict import YoloSahiPanicleUavPredictor
+from phenocv.process import (PanicleExtractor, PanicleFormatter,
+                             PaniclePostprocessor, PanicleUavPreprocessor)
 
 registry.preprocessor = catalogue.create("phenocv", "preprocessor")
 registry.predictor = catalogue.create("phenocv", "predictor")
@@ -16,9 +16,9 @@ registry.extractor = catalogue.create("phenocv", "extractor")
 
 @registry.preprocessor.register('panicle_uav')
 def panicle_uav_preprocessor(
-        width: int = 3800,
-        height: int = 2000,
-        window_size: int = 100,
+    width: int = 3800,
+    height: int = 2000,
+    window_size: int = 100,
 ) -> PanicleUavPreprocessor:
     return PanicleUavPreprocessor(
         width=width,
@@ -79,12 +79,12 @@ def panicle_postprocessor(
 
 @registry.extractor.register('panicle')
 def panicle_extractor(
-    seeding_date,
-    heading_stage=(0.1, 0.8),
-    percents=(0.1, 0.3, 0.5, 0.8)
+    seeding_date, heading_stage=(0.1, 0.8), percents=(0.1, 0.3, 0.5, 0.8)
 ) -> PanicleExtractor:
     return PanicleExtractor(
         seeding_date=seeding_date,
         heading_stage=heading_stage,
-        percents=percents
-    )
+        percents=percents)
+
+
+Register = registry

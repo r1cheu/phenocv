@@ -1,8 +1,7 @@
 _base_ = [
     '../_base_/models/faster-rcnn_r50_fpn.py',
     '../_base_/datasets/panicle_detection.py',
-    '../_base_/schedules/schedule_2x.py', '../_base_/custom_runtime.py'
-]
+    '../_base_/schedules/schedule_2x.py', '../_base_/custom_runtime.py']
 norm_cfg = dict(type='GN', num_groups=32, requires_grad=True)
 model = dict(
     backbone=dict(
@@ -30,8 +29,7 @@ param_scheduler = [
         end=max_epochs,
         by_epoch=True,
         milestones=[65, 71],
-        gamma=0.1)
-]
+        gamma=0.1)]
 
 train_cfg = dict(max_epochs=max_epochs)
 

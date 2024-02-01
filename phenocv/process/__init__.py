@@ -1,10 +1,9 @@
 from .base import Processor
-from .preprocess import PanicleUavPreprocessor
+from .extractor import PanicleExtractor
 from .formatter import PanicleFormatter
 from .postprocessor import PaniclePostprocessor
-from .extractor import PanicleExtractor
+from .preprocess import PanicleUavPreprocessor
 
 __all__ = [
     'Processor', 'PanicleUavPreprocessor', 'PanicleFormatter',
-    'PaniclePostprocessor', 'PanicleExtractor'
-]
+    'PaniclePostprocessor', 'PanicleExtractor']

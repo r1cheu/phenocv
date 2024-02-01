@@ -42,14 +42,11 @@ def new_task(out_type, root_url, file_name):
     """
     return {
         'data': {
-            'image': os.path.join(root_url, file_name)
-        },
+            'image': os.path.join(root_url, file_name)},
         # 'annotations' or 'predictions'
         out_type: [{
             'result': [],
-            'ground_truth': False,
-        }],
-    }
+            'ground_truth': False, }], }
 
 
 def create_bbox(annotation, categories, from_name, image_height, image_width,
@@ -83,14 +80,12 @@ def create_bbox(annotation, categories, from_name, image_height, image_width,
             'width': width / image_width * 100.0,
             'height': height / image_height * 100.0,
             'rotation': 0,
-            'rectanglelabels': [label],
-        },
+            'rectanglelabels': [label], },
         'to_name': to_name,
         'from_name': from_name,
         'image_rotation': 0,
         'original_width': image_width,
-        'original_height': image_height,
-    }
+        'original_height': image_height, }
     return item
 
 
@@ -129,8 +124,7 @@ def convert_coco_to_ls(
     # list to dict conversion: [...] => {category_id: category_item}
     categories = {
         int(category['id']): category
-        for category in coco['categories']
-    }
+        for category in coco['categories']}
     ids = sorted(categories.keys())  # sort labels by their origin ids
 
     for i in ids:

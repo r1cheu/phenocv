@@ -97,8 +97,8 @@ model = dict(
                     type='CrossEntropyLoss',
                     use_sigmoid=False,
                     loss_weight=1.0),
-                loss_bbox=dict(type='SmoothL1Loss', beta=1.0, loss_weight=1.0))
-        ]),
+                loss_bbox=dict(type='SmoothL1Loss', beta=1.0,
+                               loss_weight=1.0))]),
     # model training and testing settings
     train_cfg=dict(
         rpn=dict(
@@ -171,8 +171,7 @@ model = dict(
                     neg_pos_ub=-1,
                     add_gt_as_proposals=True),
                 pos_weight=-1,
-                debug=False)
-        ]),
+                debug=False)]),
     test_cfg=dict(
         rpn=dict(
             nms_pre=1000,

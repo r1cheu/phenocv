@@ -22,8 +22,8 @@ from typing import Union
 import numpy as np
 import torch
 
-from phenocv.utils import Results
-from phenocv.utils import read_image
+from phenocv.utils import Results, read_image
+
 from .base import Processor
 from .utils import binarize_cive, min_sum, moving_average
 
@@ -40,6 +40,7 @@ class PanicleUavPreprocessor(Processor):
             window size, the smoother the curve.
         names (dict): A dictionary of the (id: category) pairs.
     """
+
     def __init__(
         self,
         width: int = 3800,

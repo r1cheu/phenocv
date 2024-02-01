@@ -6,16 +6,16 @@ dictionary of traits.
 import ast
 from functools import partial
 from pathlib import Path
-from typing import Union, Tuple
+from typing import Tuple, Union
 
+import matplotlib.dates as mdates
 import numpy as np
 import pandas as pd
 from matplotlib import pyplot as plt
-import matplotlib.dates as mdates
 from scipy.optimize import curve_fit
 
 from .base import Processor
-from .utils import cut_up_curve, remove_smaller, logistic, inverse_logistic
+from .utils import cut_up_curve, inverse_logistic, logistic, remove_smaller
 
 
 class PanicleExtractor(Processor):
@@ -40,7 +40,7 @@ class PanicleExtractor(Processor):
     def __call__(self, data: Union[str, Path, pd.DataFrame]):
         self.data = data
         self.process(data)
-        return self.data
+        return self.result
 
     def process(self, data: Union[str, Path, pd.DataFrame]):
 
@@ -57,7 +57,7 @@ class PanicleExtractor(Processor):
     def before_fit(data):
 
         data = data.copy()
-        data = data[data['interpolate'] == False] # noqa
+        data = data[data['interpolate'] == False]  # noqa
 
         maximum = data['value'].max()
         min_days = data['days'].min()
@@ -76,7 +76,7 @@ class PanicleExtractor(Processor):
                 mask_days = days[mask]
             except IndexError:
                 break
-            if np.all(mask_values == values):
+            if np.all(mask_values == values[mask]):
                 break
             else:
                 values = mask_values
@@ -89,14 +89,14 @@ class PanicleExtractor(Processor):
 
         min_days, max_days, days, values, maximum = self.before_fit(data)
 
-        params, _ = curve_fit(logistic, days, values,
-                              bounds=([maximum, min_days, 0],
-                                      [maximum+0.0001, max_days, 10]))
+        params, _ = curve_fit(
+            logistic,
+            days,
+            values,
+            bounds=([maximum, min_days, 0], [maximum + 0.0001, max_days, 10]))
 
-        self.logistic = partial(logistic,
-                                K=params[0],
-                                x0=params[1],
-                                r=params[2])
+        self.logistic = partial(
+            logistic, K=params[0], x0=params[1], r=params[2])
 
         return partial(inverse_logistic, *params), int(params[0])
 
@@ -108,9 +108,8 @@ class PanicleExtractor(Processor):
         start_percent = self._percent_format(self.heading_stage[0])
         end_percent = self._percent_format(self.heading_stage[1])
 
-        self._result[
-            f'{start_percent}-{end_percent}'] = (self._result[end_percent] -
-                                                 self._result[start_percent])
+        self._result[f'{start_percent}-{end_percent}'] = (
+            self._result[end_percent] - self._result[start_percent])
 
     def clear(self):
         self._result = dict()
@@ -124,18 +123,18 @@ class PanicleExtractor(Processor):
         def _plot(ax, x, y, index, color='black'):
             ax.plot(x[~index], y[~index], 'o', color=color)
             ax.plot(x, y, color=color, linestyle='-')
-            ax.plot(x[index], y[index], 'o', color=color,
-                    markerfacecolor='white')
-            ax.plot(x, self.logistic(x), color='b',
-                    linestyle='--')
+            ax.plot(
+                x[index], y[index], 'o', color=color, markerfacecolor='white')
+            ax.plot(x, self.logistic(x), color='b', linestyle='--')
 
         def _format_ticks(ax, days, dates):
             selected_days = days[::2]
             selected_dates = dates[::2]
 
             axes.set_xticks(selected_days)
-            axes.set_xticklabels(pd.to_datetime(selected_dates).dt.strftime(
-                '%m-%d'), rotation=45)
+            axes.set_xticklabels(
+                pd.to_datetime(selected_dates).dt.strftime('%m-%d'),
+                rotation=45)
 
             ax.xaxis.set_minor_locator(mdates.DayLocator(interval=1))
             ax.tick_params(axis='x', which='minor', length=2)
