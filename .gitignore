@@ -25,12 +25,11 @@ raw_data/
 yolo_workdirs/
 tests/
 label_studio/
-weights/
 # Pytorch
 *.pth
 *.py~
 *.sh~
-*.pt
+
 phenocv.code-workspace
 .fleet/
 
