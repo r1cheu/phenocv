@@ -11,6 +11,7 @@ from pathlib import Path
 from typing import Union
 
 import cv2
+from matplotlib import pyplot as plt
 import numpy as np
 import pandas as pd
 import requests
@@ -197,7 +198,7 @@ def check_path(path):
         raise TypeError('Input must be a string, Path object or a 3D array.')
 
 
-def read_image(img: Union[str, Path], order='BGR'):
+def read_image(img: Union[str, Path], order='RGB'):
     """Read an image from file or a numpy array.
 
     Args:
@@ -269,7 +270,6 @@ class Results(_Results):
             keypoints=results.keypoints,
         )
 
-    @property
     def num_bbox(self):
         num_dict = {}
         bbox = copy.deepcopy(self.boxes)
@@ -327,3 +327,13 @@ def get_config_path(config_name: Union[str, Path]):
     else:
         raise ValueError('Wrong config, config should end with .yaml or '
                          f'.cfg, but got {config_name}')
+
+
+def imshow(img: np.ndarray, figsz=(20, 12)):
+    fig, ax = plt.subplots(figsize=figsz)
+    fig.set_facecolor('#181818')
+    ax.imshow(img)
+    ax.axis('off')
+    ax.tick_params(
+        bottom=False, left=False, labelbottom=False, labelleft=False)
+    plt.show()
