@@ -32,6 +32,10 @@ cd phenocv
 pip install -e .
 ```
 
+## Getting started
+
+Check [notebook](tutorial/getting_start.ipynb) for getting start. Note the jupyter notebook is not included in the package, you need to install jupyter separately using `pip install jupyter`.
+
 ## License
 
 This project is released under the [AGPL 3.0 license](LICENSE).

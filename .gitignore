@@ -4,12 +4,10 @@ __pycache__/
 
 *.egg-info/
 *.egg
-rawdata
 
 # Jupyter Notebook
 .ipynb_checkpoints
-*.ipynb
-notebook/
+tests/*.ipynb
 
 data/
 data
