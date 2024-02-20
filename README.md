@@ -32,9 +32,10 @@ cd phenocv
 pip install -e .
 ```
 
-## Getting started
+## Tutorial
 
-Check [notebook](tutorial/getting_start.ipynb) for getting start. Note the jupyter notebook is not included in the package, you need to install jupyter separately using `pip install jupyter`.
+| Getting Start | [![Open In GitHub](https://img.shields.io/badge/Open%20in-GitHub-blue?logo=GitHub)](https://github.com/r1cheu/phenocv/blob/main/tutorial/getting_start.ipynb) | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/r0cheu/phenocv/blob/main/tutorial/getting_start.ipynb) |
+| ------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 
 ## License
 
