@@ -94,9 +94,9 @@ def format_to_coco(args):
     output_dir = image_path_to
     output_ann_path = os.path.join(output_dir, 'annotations')
     os.makedirs(output_ann_path, exist_ok=True)
-    os.makedirs(os.path.join(image_path_to, 'images'), exist_ok=True)
+    os.makedirs(os.path.join(image_path_to, 'test_images'), exist_ok=True)
     # 初始化coco格式的字典
-    coco_format = {'images': [], 'categories': [], 'annotations': []}
+    coco_format = {'test_images': [], 'categories': [], 'annotations': []}
 
     # 自定义类别标签顺序
     if args.classes is not None:
@@ -151,7 +151,7 @@ def format_to_coco(args):
                 area = w * h
 
                 # 添加图像信息到coco格式
-                coco_format['images'].append({
+                coco_format['test_images'].append({
                     'id': image_id,
                     'file_name': image_json_name,
                     'width': width_from_json,
@@ -187,7 +187,8 @@ def format_to_coco(args):
                 })
                 index_cnt += 1
             image_from = os.path.join(image_path_from, image_json_name_)
-            image_to = os.path.join(image_path_to, 'images', image_json_name)
+            image_to = os.path.join(image_path_to, 'test_images',
+                                    image_json_name)
             image_from = urllib.parse.unquote(image_from)
             shutil.copy2(os.path.expanduser(image_from), image_to)
 
@@ -208,7 +209,7 @@ def move_to_cfg(args, classes_list):
         config_name = 'mask-rcnn_r50_fpn.py'
 
     train_ann_pth = 'annotations/ann.json'
-    train_data_pf = 'images/'
+    train_data_pf = 'test_images/'
     num_classes = len(classes_list)
 
     data_root = str('\'' + os.path.join('.',

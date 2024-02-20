@@ -30,7 +30,7 @@ def binarize_cive(img: np.ndarray) -> np.ndarray:
     Returns:
     numpy.ndarray: The binarize image.
     """
-    b, g, r = cv2.split(img)
+    r, g, b = cv2.split(img)
     cive = 0.441 * r - 0.811 * g + 0.385 * b + 18.78745
     gray = cive.astype('uint8')
     _, th = cv2.threshold(gray, 0, 1, cv2.THRESH_BINARY + cv2.THRESH_OTSU)

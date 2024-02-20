@@ -1,4 +1,5 @@
-"""Preprocess module is used to do some preprocessing on the original images.
+"""Preprocess module is used to do some preprocessing on the original
+    test_images.
 
 class:
     ImagePreprocessor: The base class for all image extractors. Preprocessor

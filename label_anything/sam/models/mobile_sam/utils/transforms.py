@@ -15,8 +15,8 @@ from torchvision.transforms.functional import to_pil_image
 
 
 class ResizeLongestSide:
-    """Resizes images to the longest side 'target_length', as well as provides
-    methods for resizing coordinates and boxes.
+    """Resizes test_images to the longest side 'target_length', as well as
+    provides methods for resizing coordinates and boxes.
 
     Provides methods for transforming both numpy array and batched torch
     tensors.
@@ -56,7 +56,7 @@ class ResizeLongestSide:
         return boxes.reshape(-1, 4)
 
     def apply_image_torch(self, image: torch.Tensor) -> torch.Tensor:
-        """Expects batched images with shape BxCxHxW and float format.
+        """Expects batched test_images with shape BxCxHxW and float format.
 
         This transformation may not exactly match apply_image. apply_image is
         the transformation expected by the model.

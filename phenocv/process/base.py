@@ -48,5 +48,5 @@ class Processor:
             self.result.to_csv(path, index=False)
 
         if isinstance(self.result, Dict):
-            with open(path, 'a') as f:
-                f.write(','.join(map(str, self.result.values())) + '\n')
+            result = pd.DataFrame(self.result, index=[0])
+            result.to_csv(path, index=False, mode='a')

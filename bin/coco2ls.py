@@ -16,13 +16,13 @@ def main():
         '-u',
         '--image_root_url',
         type=str,
-        help='root URL path where images will be hosted' +
+        help='root URL path where test_images will be hosted' +
         ', e.g.: http://example.com/images',
         default='/data/local-files/?d=')
     parser.add_argument(
         '--image_root_dir',
         type=str,
-        help='root directory path where images will be stored',
+        help='root directory path where test_images will be stored',
         default=None,
     )
     args = parser.parse_args()

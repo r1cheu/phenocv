@@ -57,7 +57,7 @@ class COCO2LS:
                 f'Following the instructions to load data into Label Studio\n'
                 f'  1. Create a new project in Label Studio\n'
                 f'  2. Use Labeling Config from "{label_config_file}"\n'
-                f'  3. Setup serving for images [e.g. you can use Local Storage (or others):\n'  # noqa
+                f'  3. Setup serving for test_images [e.g. you can use Local Storage (or others):\n'  # noqa
                 f'     https://labelstud.io/guide/storage.html#Local-storage]\n'  # noqa
                 f'  4. Import "{self._output_json}" to the project\n')
         else:
@@ -101,10 +101,11 @@ class COCO2LS:
         return tasks, tags
 
     def _get_images(self, categories):
-        images = {item['id']: item for item in self._coco['images']}
+        images = {item['id']: item for item in self._coco['test_images']}
 
-        print(f'Found {len(categories)} categories, {len(images)} images' +
-              f'and {len(self._coco["annotations"])} annotations')
+        print(
+            f'Found {len(categories)} categories, {len(images)} test_images' +
+            f'and {len(self._coco["annotations"])} annotations')
         return images
 
     def _get_categories(self, use_super_categories=False):
@@ -181,7 +182,7 @@ class COCO2LS:
 
     def _init_tasks(self, out_type):
         tasks = {}
-        for image in self._coco['images']:
+        for image in self._coco['test_images']:
             image_id, image_file_name = image['id'], image['file_name']
             tasks[image_id] = self._new_task(out_type, image_file_name)
 

@@ -1,7 +1,7 @@
 path: ./panicle_drone  # dataset root dir
-train: train.txt  # train images (relative to 'path') 118287 images
-val: val.txt  # val images (relative to 'path') 5000 images
-test: test.txt  # 20288 of 40670 images, submit to https://competitions.codalab.org/competitions/20794
+train: train.txt  # train test_images (relative to 'path') 118287 test_images
+val: val.txt  # val test_images (relative to 'path') 5000 test_images
+test: test.txt  # 20288 of 40670 test_images, submit to https://competitions.codalab.org/competitions/20794
 # Classes
 names:
   0: panicle

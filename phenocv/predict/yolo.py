@@ -21,7 +21,7 @@ object_result = namedtuple('object_result',
 
 class YoloStubbleUav(YoloPredictor):
     """YOLOStubbleUAV is a class that performs inference using YOLO model for
-    detecting stubble in UAV images.
+    detecting stubble in UAV test_images.
 
     Args:
         model: The YOLO model for inference.
@@ -35,10 +35,10 @@ class YoloStubbleUav(YoloPredictor):
     Methods:
         process(result, row=None, col=None): Processes the inference result
             and returns a StubbleGrid object.
-        plot(show=False, save_dir=None): Plots the bounding boxes on the images
-            and optionally saves them.
-        save_cut(save_dir, expand_scale=0.05): Saves the cropped images of the
-        detected stubble.
+        plot(show=False, save_dir=None): Plots the bounding boxes on the
+            test_images and optionally saves them.
+        save_cut(save_dir, expand_scale=0.05): Saves the cropped test_images of
+        the detected stubble.
     """
 
     def __init__(self,
@@ -57,9 +57,9 @@ class YoloStubbleUav(YoloPredictor):
             conf (float): The confidence threshold for object detection.
             iou (float): The IoU threshold for non-maximum suppression.
             row (int): The row index of the image when processing a grid of
-                images.
+                test_images.
             col (int): The column index of the image when processing a grid of
-                images.
+                test_images.
         """
         results = self.model.predict(source, conf=conf, iou=iou, verbose=False)
 
@@ -372,14 +372,14 @@ class YoloSahiPanicleUavPredictor(YoloSahiPredictor):
         return Results(orig_img=orig_img, path=path, names=names, boxes=boxes)
 
     def _prepare_from_results(self, source):
-        img = source.crop_img()[:, :, ::-1]
+        img = source.crop_img()[:, :, ::-1]  # convert to RGB
         orig_img = source.orig_img
         path = source.path
         old_box, names = self.update_old_box(source)
         return img, orig_img, path, old_box, names
 
     def _prepare_from_path(self, source):
-        img = read_image(source)
+        img = read_image(source, order='RGB')
         orig_img = img
         path = str(source)
         old_box = None

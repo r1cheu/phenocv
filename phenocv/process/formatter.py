@@ -26,7 +26,13 @@ class Formatter(Processor, metaclass=ABCMeta):
         pass
 
 
-class PanicleFormatter(Formatter):
+class NaiveFormatter(Formatter):
+
+    def _format(self, item: Dict[str, Any]) -> Dict[str, Any]:
+        return item
+
+
+class IdDateFormatter(Formatter):
 
     def __init__(
         self,
@@ -49,6 +55,7 @@ class PanicleFormatter(Formatter):
 
         source = item['source']
         value = item['value']
+
         _id = self.extract_data(self.id_pattern, source, 'id')
         date = self.extract_data(self.date_pattern, source, 'date')
 

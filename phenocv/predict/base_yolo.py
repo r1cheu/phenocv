@@ -1,15 +1,19 @@
 """This module contains the base class for performing inference using YOLO.
 
 """
+import os
 from abc import ABCMeta, abstractmethod
 from pathlib import Path
 from typing import Tuple, Union
+from urllib.parse import urlparse
 
+import requests
 import sahi
 import torch
 from sahi import AutoDetectionModel
 from sahi.predict import get_sliced_prediction
 from torch import Tensor
+from tqdm import tqdm
 from ultralytics import YOLO
 
 from phenocv.utils import Results, read_image
@@ -49,6 +53,16 @@ class YoloPredictor(metaclass=ABCMeta):
         self._init_model(model_weight, device)
 
     def _init_model(self, model_weight, device):
+
+        parsed = urlparse(model_weight)
+        if parsed.scheme in ('http', 'https'):
+            response = requests.get(model_weight)
+            model_weight = os.path.basename(parsed.path)
+            with open(model_weight, 'wb') as f:
+                f.write(response.content)
+        elif not os.path.isfile(model_weight):
+            raise ValueError("model_weight must be a URL or a file path, got "
+                             f"{model_weight}")
         self.model = YOLO(model_weight).to(device)
         self.device = device
 
@@ -141,7 +155,74 @@ class YoloSahiPredictor:
         self.overlap_width_ratio = overlap_width_ratio
         self._init_model(model_type, model_weight, device)
 
+    @staticmethod
+    def load_weight(model_weight: Union[str, os.PathLike]) -> str:
+        """
+        Load model weights from a local file or a URL.
+
+        If model_weight is a URL, download the file and return the local path.
+        If model_weight is a local file path, check its existence and return
+        the path.
+
+        Args:
+            model_weight: A URL or a local file path pointing to the model
+            weights.
+
+        Returns:
+            The local path to the model weights.
+
+        Raises:
+            ValueError: If model_weight is neither a URL nor a local file path.
+        """
+        parsed = urlparse(model_weight)
+
+        if parsed.scheme in ('http', 'https'):
+            try:
+                response = requests.get(model_weight, stream=True)
+                response.raise_for_status()
+            except requests.RequestException as e:
+                raise ValueError(f"Failed to download {model_weight}: {e}")
+
+            # Create full path for the file to be downloaded
+            local_path = os.path.join('./', os.path.basename(parsed.path))
+            # if local_path exists, skip downloading
+            if os.path.isfile(local_path):
+                return local_path
+            # Download the file with a progress bar
+            total_size_in_bytes = int(
+                response.headers.get('content-length', 0))
+            progress_bar = tqdm(
+                total=total_size_in_bytes,
+                unit='iB',
+                unit_scale=True,
+                desc=f'Downloading {os.path.basename(local_path)}',
+            )
+
+            with open(local_path, 'wb') as f:
+                for chunk in response.iter_content(chunk_size=1024):
+                    progress_bar.update(len(chunk))
+                    f.write(chunk)
+
+            progress_bar.close()
+
+            if (total_size_in_bytes != 0
+                    and progress_bar.n != total_size_in_bytes):  # noqa
+                raise ValueError(
+                    "ERROR, something went wrong with the download")
+
+            print(f"Downloaded file to {os.path.abspath(local_path)}")
+        elif os.path.isfile(model_weight):
+            local_path = model_weight
+        else:
+            raise ValueError("model_weight must be a URL or a file path, got "
+                             f"{model_weight}")
+
+        return local_path
+
     def _init_model(self, model_type, model_weight, device):
+
+        model_weight = self.load_weight(model_weight)
+        print(f'Loading model from {model_weight}')
 
         self.model = AutoDetectionModel.from_pretrained(
             model_type=model_type,

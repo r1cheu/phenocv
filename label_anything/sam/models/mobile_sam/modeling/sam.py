@@ -62,12 +62,12 @@ class Sam(nn.Module):
         batched_input: List[Dict[str, Any]],
         multimask_output: bool,
     ) -> List[Dict[str, torch.Tensor]]:
-        """Predicts masks end-to-end from provided images and prompts. If
+        """Predicts masks end-to-end from provided test_images and prompts. If
         prompts are not known in advance, using SamPredictor is recommended
         over calling the model directly.
 
         Arguments:
-          batched_input (list(dict)): A list over path images, each a
+          batched_input (list(dict)): A list over path test_images, each a
             dictionary with the following keys. A prompt key can be
             excluded if it is not present.
               'image': The image as a torch tensor in 3xHxW format,
@@ -87,7 +87,7 @@ class Sam(nn.Module):
             disambiguating masks, or return a single mask.
 
         Returns:
-          (list(dict)): A list over path images, where each element is
+          (list(dict)): A list over path test_images, where each element is
             as dictionary with the following keys.
               'masks': (torch.Tensor) Batched binary mask predictions,
                 with shape BxCxHxW, where B is the number of path prompts,

@@ -11,11 +11,11 @@ from pathlib import Path
 from typing import Union
 
 import cv2
-from matplotlib import pyplot as plt
 import numpy as np
 import pandas as pd
 import requests
 import torch
+from matplotlib import pyplot as plt
 from ultralytics.engine.results import Results as _Results
 
 
@@ -78,6 +78,7 @@ def scandir(dir_path, suffix=None, recursive=False, case_sensitive=True):
                                     case_sensitive)
 
     files = sorted(list(_scandir(dir_path, suffix, recursive, case_sensitive)))
+    files = [str(Path(root) / file) for file in files]
     if not found_files:
         raise FileNotFoundError(f'No files with suffix {suffix} found in the '
                                 f'directory {dir_path}. Please check the '
@@ -96,7 +97,7 @@ def match_yolo_annotations(ann_dir, img_dir, img_suffix='.jpg'):
     imgs = sorted(list(imgs))
 
     if len(anns) == 0 or len(imgs) == 0:
-        raise FileNotFoundError('No annotations or images found.')
+        raise FileNotFoundError('No annotations or test_images found.')
 
     for ann in anns:
         img = ann.replace('.txt', img_suffix)
@@ -198,7 +199,7 @@ def check_path(path):
         raise TypeError('Input must be a string, Path object or a 3D array.')
 
 
-def read_image(img: Union[str, Path], order='RGB'):
+def read_image(img: Union[str, Path], order='BGR'):
     """Read an image from file or a numpy array.
 
     Args:
@@ -217,7 +218,7 @@ def read_image(img: Union[str, Path], order='RGB'):
             raise FileNotFoundError(f'{img} does not exist.')
         img = cv2.imread(img)
 
-        if order == 'RGB':
+        if order.lower() == 'rgb':
             img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
 
     else:
@@ -234,7 +235,7 @@ def save_img(img: np.ndarray, file_path: Union[str, Path], order='BGR'):
         file_path (str | :obj:`Path`): Path of the image file.
         order (str, optional): Order of channel. Defaults to 'BGR'.
     """
-    if order == 'RGB':
+    if order.lower() == 'rgb':
         img = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
     cv2.imwrite(str(file_path), img)
 

@@ -17,8 +17,8 @@ class YOLOto:
 
     def _check_input(self):
         """Check if the required path files and directories exist. This method
-        checks if the 'images', 'labels', and 'classes.txt' files exist in the
-        raw_data_dir. It also checks if the 'train.txt', 'val.txt', and
+        checks if the 'test_images', 'labels', and 'classes.txt' files exist in
+        the raw_data_dir. It also checks if the 'train.txt', 'val.txt', and
         'test.txt' files exist in the raw_data_dir. The existing modes are
         stored in the mode_list attribute.
 
@@ -26,7 +26,7 @@ class YOLOto:
             None
         """
         mode_list = []
-        for file in ['images', 'labels', 'classes.txt']:
+        for file in ['test_images', 'labels', 'classes.txt']:
             check_img_input(self.raw_data_dir / file)
 
         for mode in ['train', 'val', 'test']:

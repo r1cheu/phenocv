@@ -1,3 +1,3 @@
-from .traits import PanicleAnalyzer
+from .traits import PanicleHeadingDateAnalyzer, PanicleNumAnalyzer
 
-__all__ = ['PanicleAnalyzer']
+__all__ = ['PanicleNumAnalyzer', 'PanicleHeadingDateAnalyzer']

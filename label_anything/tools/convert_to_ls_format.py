@@ -19,7 +19,7 @@ def parse_args():
     parser.add_argument('--output-file', help='output Label Studio JSON file')
     parser.add_argument(
         '--image-root-url',
-        help='root URL path where images will be hosted' +
+        help='root URL path where test_images will be hosted' +
         ', e.g.: http://example.com/images',
         default='/data/local-files/?d=')
 
@@ -137,9 +137,9 @@ def convert_coco_to_ls(
     categories = new_categories
 
     # mapping: image id => image
-    images = {item['id']: item for item in coco['images']}
+    images = {item['id']: item for item in coco['test_images']}
 
-    print(f'Found {len(categories)} categories, {len(images)} images' +
+    print(f'Found {len(categories)} categories, {len(images)} test_images' +
           f'and {len(coco["annotations"])} annotations')
 
     # flags for labeling config composing
@@ -149,7 +149,7 @@ def convert_coco_to_ls(
     tags = {}
 
     # create tasks
-    for image in coco['images']:
+    for image in coco['test_images']:
         image_id, image_file_name = image['id'], image['file_name']
         tasks[image_id] = new_task(out_type, image_root_url, image_file_name)
 
@@ -198,7 +198,7 @@ def convert_coco_to_ls(
             f'Following the instructions to load data into Label Studio\n'
             f'  1. Create a new project in Label Studio\n'
             f'  2. Use Labeling Config from "{label_config_file}"\n'
-            f'  3. Setup serving for images [e.g. you can use Local Storage (or others):\n'  # noqa
+            f'  3. Setup serving for test_images [e.g. you can use Local Storage (or others):\n'  # noqa
             f'     https://labelstud.io/guide/storage.html#Local-storage]\n'
             f'  4. Import "{out_file}" to the project\n')
     else:

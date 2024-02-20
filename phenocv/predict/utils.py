@@ -133,9 +133,9 @@ def draw_bounding_boxes(
     elif image.dtype != np.uint8:
         raise ValueError(f'uint8 dtype expected, got {image.dtype}')
     elif len(image.shape) != 3:
-        raise ValueError('Pass individual images, not batches')
+        raise ValueError('Pass individual test_images, not batches')
     elif image.shape[-1] not in {1, 3}:
-        raise ValueError('Only grayscale and RGB images are supported')
+        raise ValueError('Only grayscale and RGB test_images are supported')
 
     num_boxes = boxes.shape[0]
 

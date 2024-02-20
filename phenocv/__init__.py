@@ -1,5 +1,5 @@
-from phenocv.analysis import PanicleAnalyzer
+from phenocv.analysis import PanicleHeadingDateAnalyzer, PanicleNumAnalyzer
 
 __version__ = '0.1.2'
 
-__all__ = ['PanicleAnalyzer']
+__all__ = ['PanicleHeadingDateAnalyzer', 'PanicleNumAnalyzer']

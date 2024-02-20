@@ -4,7 +4,7 @@ import catalogue
 from confection import Config, registry
 
 from phenocv.predict import YoloSahiPanicleUavPredictor
-from phenocv.process import (PanicleExtractor, PanicleFormatter,
+from phenocv.process import (IdDateFormatter, NaiveFormatter, PanicleExtractor,
                              PaniclePostprocessor, PanicleUavPreprocessor)
 
 registry.preprocessor = catalogue.create("phenocv", "preprocessor")
@@ -53,15 +53,20 @@ def yolo_sahi_panicle_uav_predictor(
     )
 
 
-@registry.formatter.register('panicle')
-def panicle_formatter(
+@registry.formatter.register('id_date')
+def id_date_formatter(
     id_pattern: str,
     date_pattern: str = r'\d{8}',
-) -> PanicleFormatter:
-    return PanicleFormatter(
+) -> IdDateFormatter:
+    return IdDateFormatter(
         id_pattern=id_pattern,
         date_pattern=date_pattern,
     )
+
+
+@registry.formatter.register('naive')
+def naive_formatter() -> NaiveFormatter:
+    return NaiveFormatter()
 
 
 @registry.postprocessor.register('panicle')
@@ -87,6 +92,6 @@ def panicle_extractor(
         percents=percents)
 
 
-Register = registry
+Registry = registry
 
-__all__ = ['Register', 'Config']
+__all__ = ['Registry', 'Config']

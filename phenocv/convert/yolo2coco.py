@@ -79,7 +79,7 @@ class YOLOtoCOCO(YOLOto):
 
         json_data = {
             'info': self.info,
-            'images': images,
+            'test_images': images,
             'type': self._type,
             'annotations': annotations,
             'categories': self.categories, }
@@ -89,7 +89,7 @@ class YOLOtoCOCO(YOLOto):
         img_path = Path(img_path)
         if self.raw_data_dir.as_posix() not in img_path.as_posix():
             # relative path (relative to the raw_data_dir)
-            # e.g. images/images(3).jpg
+            # e.g. test_images/test_images(3).jpg
             img_path = self.raw_data_dir / img_path
 
         check_img_input(img_path)
