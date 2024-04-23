@@ -9,21 +9,10 @@ ci:
 
 # Define repos to run
 repos:
-  - repo: https://github.com/PyCQA/flake8
-    rev: 5.0.4
-    hooks:
-      - id: flake8
-
   - repo: https://github.com/PyCQA/isort
     rev: 5.11.5
     hooks:
       - id: isort
-
-  - repo: https://github.com/pre-commit/mirrors-yapf
-    rev: v0.32.0
-    hooks:
-      - id: yapf
-        additional_dependencies: [toml]
 
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v4.5.0

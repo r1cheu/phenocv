@@ -17,8 +17,9 @@ Typical usage example:
     results = preprocessor.results
 
 """
+import logging
 from pathlib import Path
-from typing import Union
+from typing import Tuple, Union
 
 import numpy as np
 import torch
@@ -26,10 +27,38 @@ import torch
 from phenocv.utils import Results, read_image
 
 from .base import Processor
-from .utils import binarize_cive, min_sum, moving_average
+from .utils import binarize_cive, find_min
 
 
-class PanicleUavPreprocessor(Processor):
+class Preprocessor(Processor):
+
+    def __init__(self,
+                 names: Tuple | str = None):
+        super().__init__()
+
+        if names is None:
+            logging.warning('No names provided, using default names')
+            self.names = {0: "NoName"}
+        if isinstance(names, str):
+            self.names = {0: names}
+        if isinstance(names, tuple):
+            self.names = {i: name for i, name in enumerate(names)}
+
+    def __call__(self, img_path: Union[str, Path]):
+        img = read_image(img_path, order='RGB')
+        boxes = self.process(img)
+
+        self._result = Results(
+            orig_img=img,
+            names=self.names,
+            path=img_path,
+            boxes=boxes,
+        )
+
+        return self.result
+
+
+class PrePanicleUavHW(Preprocessor):
     """Preprocess the image from the UAV, which need to locate the central
     plot of the image. The image is first binarized with CIVE, then the
     image is cropped to the region of interest.
@@ -47,43 +76,51 @@ class PanicleUavPreprocessor(Processor):
         width: int = 3800,
         height: int = 2000,
         window_size: int = 100,
+        names: Tuple[str] = ('plot', ),
     ):
-        super().__init__()
+        super().__init__(names=names)
         self.height = height
         self.width = width
         self.window_size = window_size
-        self.names = {0: "plot"}
-
-    def __call__(self, img_path: Union[str, Path]):
-        """using the CIVE to binarize the image, then find the minimum
-        sum of the binarized image to locate the plot.
-
-        Args:
-            img_path (str or Path): The path to the image.
-        """
-        img = read_image(img_path)
-        boxes = self.process(img)
-
-        self._result = Results(
-            orig_img=img,
-            names=self.names,
-            path=img_path,
-            boxes=boxes,
-        )
-
-        return self.result
 
     def process(self, img: np.ndarray):
         bin_image = binarize_cive(img)
 
-        x = np.apply_along_axis(np.sum, 0, bin_image)
-        x = moving_average(x, self.window_size)
-        x1, x2 = min_sum(x, self.width, self.window_size)
+        x1, x2 = find_min(bin_image, 0, self.window_size, self.width)
+        y1, y2 = find_min(bin_image, 1, self.window_size, self.height)
 
-        y = np.apply_along_axis(np.sum, 1, bin_image)
-        y = moving_average(y, self.window_size)
-        y1, y2 = min_sum(y, self.height, self.window_size)
+        return torch.tensor([[x1, y1, x2, y2, 0, 0]])
 
-        boxes = torch.tensor([[x1, y1, x2, y2, 0, 0]])
 
-        return boxes
+class PrePanicleUav(Preprocessor):
+
+    def __init__(self,
+                 window_size: int = 100,
+                 w_ratio: float = 2,
+                 names: Tuple[str] = ('plot', )):
+        super().__init__(names=names)
+        self.window_size = window_size
+        self.w_ratio = w_ratio
+
+    def process(self, img: np.ndarray):
+
+        bin_image = binarize_cive(img)
+
+        up, down = self.cut_2_image(bin_image)
+
+        y1 = find_min(up, 1, self.window_size)
+        y2 = find_min(down, 1, self.window_size) + bin_image.shape[0] // 2
+        width = int((y2 - y1) * self.w_ratio)
+        x1, x2 = find_min(bin_image, 0, self.window_size, width)
+
+        return torch.tensor([[x1, y1, x2, y2, 0, 0]])
+
+    @staticmethod
+    def cut_2_image(img):
+
+        half_h = img.shape[0] // 2
+
+        up = img[:half_h, :]
+        down = img[half_h:, :]
+
+        return up, down

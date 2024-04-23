@@ -125,28 +125,30 @@ class PanicleExtractor(Processor):
             ax.plot(x, y, color=color, linestyle='-')
             ax.plot(
                 x[index], y[index], 'o', color=color, markerfacecolor='white')
-            ax.plot(x, self.logistic(x), color='b', linestyle='--')
+            ax.plot(x, self.logistic(x), color='#55A5FF', linestyle='--')
 
-        def _format_ticks(ax, days, dates):
+        def _format_ticks(ax: plt.axes, days, dates):
             selected_days = days[::2]
             selected_dates = dates[::2]
 
-            axes.set_xticks(selected_days)
-            axes.set_xticklabels(
+            ax.set_xticks(selected_days)
+            ax.set_xticklabels(
                 pd.to_datetime(selected_dates).dt.strftime('%m-%d'),
                 rotation=45)
 
             ax.xaxis.set_minor_locator(mdates.DayLocator(interval=1))
             ax.tick_params(axis='x', which='minor', length=2)
 
-            ax.set_xlim(34, 127)
+            ax.set_xlabel('Date')
+            ax.set_ylabel('Number of Panicles')
+
 
         _plot(axes, self.data['days'], self.data['value'], impute_index)
         _format_ticks(axes, self.data['days'], self.data['date'])
         axes.set_title(self.data['id'].iloc[0])
 
         for key in [f"{int(i * 100)}%" for i in self.percents]:
-            axes.axvline(self.result[key], color='b', linestyle='--')
+            axes.axvline(self.result[key], color='#55A5FF', linestyle='--')
 
         plt.tight_layout()
         plt.savefig(save_path, dpi=300)

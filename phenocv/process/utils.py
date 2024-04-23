@@ -33,7 +33,8 @@ def binarize_cive(img: np.ndarray) -> np.ndarray:
     r, g, b = cv2.split(img)
     cive = 0.441 * r - 0.811 * g + 0.385 * b + 18.78745
     gray = cive.astype('uint8')
-    _, th = cv2.threshold(gray, 0, 1, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
+    _, th = cv2.threshold(gray, 0, 1,
+                          cv2.THRESH_BINARY + cv2.THRESH_OTSU)
     return th
 
 
@@ -52,7 +53,7 @@ def moving_average(interval, window_size):
     return re
 
 
-def min_sum(x, length, window_size):
+def min_sum(x, window_size, board_interval=None):
     """Calculate the index range with the minimum sum of a given array.
 
     Parameters:
@@ -64,9 +65,26 @@ def min_sum(x, length, window_size):
     tuple: A tuple containing the start and end index of the range with
         the minimum sum.
     """
-    i_sum = x[:-length] + x[length:]
-    index = np.argmin(i_sum) + window_size
-    return index, index + length
+    if board_interval:
+        i_sum = x[:-board_interval] + x[board_interval:]
+        index = np.argmin(i_sum) + window_size
+        return index, index + board_interval
+    else:
+        index = np.argmin(x) + window_size
+        return index
+
+
+def find_min(bin_image, axis, window_size, board_interval=None) -> tuple[int, int] | int :
+
+    bin_image = np.apply_along_axis(np.sum, axis, bin_image)
+    bin_image = moving_average(bin_image, window_size)
+
+    if board_interval:
+        start, end = min_sum(bin_image, window_size, board_interval)
+        return start, end
+    else:
+        start = min_sum(bin_image, window_size)
+        return start
 
 
 def cut_up_curve(df: pd.DataFrame):

@@ -5,7 +5,8 @@ from confection import Config, registry
 
 from phenocv.predict import YoloSahiPanicleUavPredictor
 from phenocv.process import (IdDateFormatter, NaiveFormatter, PanicleExtractor,
-                             PaniclePostprocessor, PanicleUavPreprocessor)
+                             PaniclePostprocessor, PrePanicleUav,
+                             PrePanicleUavHW)
 
 registry.preprocessor = catalogue.create("phenocv", "preprocessor")
 registry.predictor = catalogue.create("phenocv", "predictor")
@@ -14,17 +15,31 @@ registry.postprocessor = catalogue.create("phenocv", "postprocessor")
 registry.extractor = catalogue.create("phenocv", "extractor")
 
 
-@registry.preprocessor.register('panicle_uav')
-def panicle_uav_preprocessor(
+@registry.preprocessor.register('panicle_uav_hw')
+def panicle_uav_hw_pre(
     width: int = 3800,
     height: int = 2000,
     window_size: int = 100,
-) -> PanicleUavPreprocessor:
-    return PanicleUavPreprocessor(
+    names: Tuple[str] | str = 'plot'
+) -> PrePanicleUavHW:
+    return PrePanicleUavHW(
         width=width,
         height=height,
         window_size=window_size,
+        names=names
     )
+
+
+@registry.preprocessor.register('panicle_uav')
+def panicle_uav_pre(
+    window_size: int = 100,
+    w_ratio: float = 1.8,
+    names: Tuple[str] | str = 'plot'
+) -> PrePanicleUav:
+    return PrePanicleUav(
+        window_size=window_size,
+        w_ratio=w_ratio,
+        names=names)
 
 
 @registry.predictor.register('yolo_sahi_panicle_uav')

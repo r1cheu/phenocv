@@ -195,5 +195,3 @@ class PanicleHeadingDateAnalyzer(Analyzer):
         self.traits = self.postprocess(raw_csv, interp_csv, self.save_file)
         self.extractor.plot(_img)
         self.clear()
-
-        return self.traits

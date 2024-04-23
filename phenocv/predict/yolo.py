@@ -372,7 +372,7 @@ class YoloSahiPanicleUavPredictor(YoloSahiPredictor):
         return Results(orig_img=orig_img, path=path, names=names, boxes=boxes)
 
     def _prepare_from_results(self, source):
-        img = source.crop_img()[:, :, ::-1]  # convert to RGB
+        img = source.crop_img()  # convert to RGB
         orig_img = source.orig_img
         path = source.path
         old_box, names = self.update_old_box(source)
